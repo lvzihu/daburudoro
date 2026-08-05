@@ -1,0 +1,23 @@
+:root {
+  color-scheme: light;
+  font-family: ui-rounded, "SF Pro Rounded", system-ui, sans-serif;
+  color: #352d20;
+}
+
+* { box-sizing: border-box; }
+
+html, body { width: 100%; height: 100%; margin: 0; background: transparent; overflow: hidden; }
+button, input { font: inherit; }
+
+.widget { width: 100%; height: 100%; display: grid; grid-template-rows: 18px 180px 1fr; padding: 4px 10px 10px; pointer-events: none; }
+.drag-handle { -webkit-app-region: drag; cursor: grab; text-align: center; color: rgba(53, 45, 32, 0.55); letter-spacing: 4px; user-select: none; pointer-events: auto; }
+.character { width: 100%; height: 180px; object-fit: contain; user-select: none; pointer-events: none; }
+.panel { -webkit-app-region: no-drag; background: rgba(255, 248, 211, 0.94); border: 2px solid #e5bc3b; border-radius: 18px; padding: 10px; box-shadow: 0 6px 20px rgba(81, 59, 0, 0.16); pointer-events: auto; }
+.status-row { display: flex; justify-content: space-between; font-size: 12px; font-weight: 700; }
+.countdown { text-align: center; font-size: 32px; font-variant-numeric: tabular-nums; font-weight: 800; line-height: 1.25; }
+.controls { display: grid; grid-template-columns: 1.2fr repeat(3, 1fr); gap: 5px; align-items: end; }
+label { font-size: 10px; font-weight: 700; }
+input { width: 100%; margin-top: 2px; border: 1px solid #c49b23; border-radius: 7px; padding: 5px; background: #fffdf4; }
+button { border: 0; border-radius: 7px; padding: 6px 2px; background: #f2c84b; color: #352d20; font-size: 10px; font-weight: 800; cursor: pointer; }
+button:disabled { opacity: 0.45; cursor: default; }
+button:hover:not(:disabled) { background: #ffd967; }

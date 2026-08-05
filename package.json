@@ -1,0 +1,14 @@
+{
+  "name": "paramodo",
+  "version": "1.0.0",
+  "private": true,
+  "description": "A floating Pomodoro body-doubling companion for macOS.",
+  "main": "src/main.js",
+  "scripts": {
+    "start": "electron .",
+    "test": "node --test"
+  },
+  "devDependencies": {
+    "electron": "^43.3.0"
+  }
+}
