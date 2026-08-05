@@ -1,0 +1,60 @@
+const test = require("node:test");
+const assert = require("node:assert/strict");
+const fs = require("node:fs");
+const os = require("node:os");
+const path = require("node:path");
+const {
+  SettingsStore,
+  DEFAULT_PREFERENCES,
+  sanitizePreferences,
+} = require("../src/settings-store");
+
+test("sanitizes invalid persisted values", () => {
+  assert.deepEqual(
+    sanitizePreferences({
+      focusMinutes: 0,
+      breakMinutes: "nope",
+      totalCycles: 2.5,
+      soundEnabled: "yes",
+      expanded: 1,
+      windowPosition: { x: "left", y: 20 },
+    }),
+    DEFAULT_PREFERENCES,
+  );
+});
+
+test("persists valid preferences and merges partial updates", () => {
+  const directory = fs.mkdtempSync(path.join(os.tmpdir(), "daburudoro-settings-"));
+  const filePath = path.join(directory, "preferences.json");
+  const store = new SettingsStore(filePath);
+  store.load();
+  store.save({ focusMinutes: 50, windowPosition: { x: 20, y: 30 } });
+  store.save({ soundEnabled: false });
+
+  const reloaded = new SettingsStore(filePath).load();
+  assert.equal(reloaded.focusMinutes, 50);
+  assert.equal(reloaded.soundEnabled, false);
+  assert.deepEqual(reloaded.windowPosition, { x: 20, y: 30 });
+});
+
+test("resetTimerDefaults keeps display and window preferences", () => {
+  const directory = fs.mkdtempSync(path.join(os.tmpdir(), "daburudoro-settings-"));
+  const store = new SettingsStore(path.join(directory, "preferences.json"));
+  store.load();
+  store.save({
+    focusMinutes: 90,
+    breakMinutes: 12,
+    totalCycles: 4,
+    soundEnabled: false,
+    expanded: true,
+    windowPosition: { x: 100, y: 200 },
+  });
+
+  const preferences = store.resetTimerDefaults();
+  assert.equal(preferences.focusMinutes, 35);
+  assert.equal(preferences.breakMinutes, 5);
+  assert.equal(preferences.totalCycles, 1);
+  assert.equal(preferences.soundEnabled, true);
+  assert.equal(preferences.expanded, true);
+  assert.deepEqual(preferences.windowPosition, { x: 100, y: 200 });
+});

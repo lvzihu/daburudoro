@@ -1,15 +1,36 @@
 {
   "name": "daburudoro",
   "productName": "DaburuDoro",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "private": true,
+  "author": "lvzihu",
   "description": "A floating Pomodoro body-doubling companion for macOS.",
   "main": "src/main.js",
   "scripts": {
     "start": "electron .",
-    "test": "node --test"
+    "test": "node --test",
+    "build:mac": "electron-builder --mac dir --arm64"
   },
   "devDependencies": {
-    "electron": "^43.3.0"
+    "electron": "^43.3.0",
+    "electron-builder": "^26.15.3"
+  },
+  "build": {
+    "appId": "com.lvzihu.daburudoro",
+    "productName": "DaburuDoro",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "src/**/*",
+      "assets/**/*",
+      "package.json"
+    ],
+    "mac": {
+      "category": "public.app-category.productivity",
+      "icon": "assets/app-icon.png",
+      "identity": null,
+      "target": "dir"
+    }
   }
 }

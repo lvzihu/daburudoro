@@ -6,6 +6,7 @@ const CHARACTER_ID = "yellow";
 const CHARACTER_ROOT = path.join(__dirname, "..", "assets", "characters", CHARACTER_ID);
 
 function framesFor(state) {
+  if (!fs.existsSync(CHARACTER_ROOT)) return [];
   return fs
     .readdirSync(CHARACTER_ROOT)
     .filter((file) => file.startsWith(`${state}-`) && file.endsWith(".png"))
@@ -21,8 +22,19 @@ contextBridge.exposeInMainWorld("daburuDoro", {
   setMousePassthrough: (shouldIgnore) => {
     ipcRenderer.send("set-mouse-passthrough", shouldIgnore);
   },
+  setSessionActive: (active) => ipcRenderer.send("session:set-active", active),
+  getPreferences: () => ipcRenderer.invoke("preferences:get"),
+  savePreferences: (partial) => ipcRenderer.invoke("preferences:save", partial),
+  resetDefaults: () => ipcRenderer.invoke("preferences:reset-defaults"),
+  confirmReset: () => ipcRenderer.invoke("session:confirm-reset"),
+  hideWidget: () => ipcRenderer.invoke("widget:hide"),
+  showNotification: (body) => ipcRenderer.invoke("notification:show", { body }),
+  onAppAction: (callback) => {
+    ipcRenderer.on("app-action", (_event, action) => callback(action));
+  },
   frames: {
     working: framesFor("working"),
     break: framesFor("break"),
+    idle: framesFor("idle"),
   },
 });

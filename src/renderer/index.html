@@ -11,23 +11,75 @@
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
-    <main class="widget">
-      <div class="drag-handle" aria-label="Drag DaburuDoro">•••</div>
-      <img id="character" class="character" alt="Yellow companion" draggable="false" />
-      <section class="panel">
-        <div class="status-row">
+    <main id="widget" class="widget is-collapsed">
+      <div class="companion-surface" aria-label="Drag DaburuDoro">
+        <img id="character" class="character" alt="Yellow companion" draggable="false" />
+      </div>
+
+      <button
+        id="progress-toggle"
+        class="progress-toggle"
+        type="button"
+        aria-controls="panel"
+        aria-expanded="false"
+        title="Show timer controls"
+      >
+        <span id="progress-fill" class="progress-fill"></span>
+        <span id="progress-label" class="visually-hidden">Ready</span>
+      </button>
+
+      <section id="panel" class="panel" aria-label="Timer controls">
+        <header class="status-row">
           <span id="phase">Ready</span>
           <span id="cycle">Cycle 1 / 1</span>
-        </div>
+        </header>
+
         <div id="countdown" class="countdown">35:00</div>
-        <div class="controls">
-          <label>Cycles <input id="cycles" type="number" min="1" max="99" value="1" /></label>
+
+        <div class="timer-inputs">
+          <label>
+            Focus
+            <span class="input-with-unit">
+              <input id="focus-minutes" type="number" min="1" step="1" inputmode="numeric" />
+              <span>min</span>
+            </span>
+          </label>
+          <label>
+            Break
+            <span class="input-with-unit">
+              <input id="break-minutes" type="number" min="1" step="1" inputmode="numeric" />
+              <span>min</span>
+            </span>
+          </label>
+          <label>
+            Cycles
+            <span class="input-with-unit">
+              <input id="cycles" type="number" min="1" step="1" inputmode="numeric" />
+              <span>×</span>
+            </span>
+          </label>
+        </div>
+
+        <p id="validation" class="validation" role="alert" aria-live="polite"></p>
+
+        <div class="primary-controls">
           <button id="start" type="button">Start</button>
           <button id="pause" type="button" disabled>Pause</button>
-          <button id="reset" type="button">Reset</button>
+          <button id="reset" type="button" disabled>Reset</button>
+          <button id="hide" class="secondary" type="button">Hide</button>
         </div>
+
+        <footer class="panel-footer">
+          <label class="sound-toggle">
+            <input id="sound" type="checkbox" />
+            <span>Sound</span>
+          </label>
+          <button id="defaults" class="text-button" type="button">Defaults</button>
+          <button id="collapse" class="text-button" type="button">Collapse</button>
+        </footer>
       </section>
     </main>
+
     <script src="../timer.js"></script>
     <script src="renderer.js"></script>
   </body>
