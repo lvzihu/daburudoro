@@ -45,7 +45,19 @@ must stay publicly defensible. Any personal, real-person-styled asset is a
 ## Status
 
 - v1 released as `v1.0.0`.
-- v2 implements the approved `daburudoro-v2-prd.md` scope.
+- v2 implements the approved `daburudoro-v2-prd.md` scope and was owner-tested
+  and accepted for the `v2.0.0` release in
+  [PR #1](https://github.com/lvzihu/daburudoro/pull/1).
+
+## Version history and build evidence
+
+- [`CHANGELOG.md`](CHANGELOG.md) — reader-friendly improvements by version.
+- [`docs/releases/v2.0.0.md`](docs/releases/v2.0.0.md) — v2 release notes.
+- [`docs/build-traces/v2-daily-usability.md`](docs/build-traces/v2-daily-usability.md)
+  — decisions, implementation sequence, verification, and acceptance gate.
+- [`daburudoro-v1-prd.md`](daburudoro-v1-prd.md) and
+  [`daburudoro-v2-prd.md`](daburudoro-v2-prd.md) — frozen requirements for
+  comparing intent with each build.
 
 ## Run it
 
