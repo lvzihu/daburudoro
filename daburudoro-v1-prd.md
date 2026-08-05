@@ -1,4 +1,4 @@
-# paramodo — Product Requirements Document
+# DaburuDoro — Product Requirements Document
 
 > A floating desktop Pomodoro companion that gives a body-doubling feeling.
 > **Owner:** Priscilla · **Status:** v1 spec, ready to build · **Build method:** implemented by an AI coding agent (Claude Code / Codex) with the owner directing and reviewing.
@@ -7,7 +7,7 @@
 
 ## 1. Purpose (read this first, agent)
 
-This document is the build spec for **paramodo v1**. Implement **only** what is in
+This document is the build spec for **DaburuDoro v1**. Implement **only** what is in
 "v1 Scope" and "Acceptance Criteria." Everything in "Non-Goals" and "Roadmap"
 is explicitly **out of scope for v1** — do not build it, even if it seems easy.
 When a detail is unspecified, prefer the simplest option that satisfies the

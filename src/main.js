@@ -3,6 +3,8 @@ const path = require("node:path");
 
 let mainWindow;
 
+app.setName("DaburuDoro");
+
 function createWindow() {
   mainWindow = new BrowserWindow({
     width: 240,

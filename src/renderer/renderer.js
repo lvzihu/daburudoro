@@ -33,7 +33,7 @@ function render(state) {
   elements.start.disabled = state.isRunning;
   elements.cycles.disabled = state.phase !== "idle";
 
-  const frames = window.paramodo.frames[animationState(state)];
+  const frames = window.daburuDoro.frames[animationState(state)];
   if (frames.length) elements.character.src = frames[frameIndex % frames.length];
 }
 
@@ -55,7 +55,7 @@ document.addEventListener("mousemove", (event) => {
   const shouldPassThrough = !isInteractive;
   if (shouldPassThrough === isPassingMouseThrough) return;
   isPassingMouseThrough = shouldPassThrough;
-  window.paramodo.setMousePassthrough(shouldPassThrough);
+  window.daburuDoro.setMousePassthrough(shouldPassThrough);
 });
 
 setInterval(() => render(timer.tick()), 1000);

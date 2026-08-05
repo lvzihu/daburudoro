@@ -1,4 +1,4 @@
-# paramodo
+# DaburuDoro
 
 A floating, always-on-top desktop **Pomodoro companion** that gives a
 body-doubling feeling: a cartoon character that visibly "works" (typing) while
@@ -14,8 +14,8 @@ and reviews. To keep that clean, we follow one convention:
 Each version/milestone gets its own scoped spec that assumes the previous one is
 built:
 
-- `paramodo-v1-prd.md` — the v1 build spec (frozen; do not rewrite it).
-- `paramodo-v2-prd.md` / `paramodo-m3-characters.md` / etc. — the *next*
+- `daburudoro-v1-prd.md` — the v1 build spec (frozen; do not rewrite it).
+- `daburudoro-v2-prd.md` / `daburudoro-m3-characters.md` / etc. — the *next*
   increment, written when we're ready for it.
 
 Reason: coding agents build best from small, sharp specs and tend to over-build
@@ -29,7 +29,7 @@ coding-ai root) is the human-readable version of the same history.
 
 **3. The loop for each new iteration:**
 say "ready for the next piece" → short grill (the `grill-me-ph` skill) →
-new scoped `paramodo-vN-prd.md` → hand to the agent on a fresh branch.
+new scoped `daburudoro-vN-prd.md` → hand to the agent on a fresh branch.
 
 ## Character assets & likeness rule
 
@@ -43,7 +43,7 @@ must stay publicly defensible. Any personal, real-person-styled asset is a
 
 ## Status
 
-- v1 implemented. See `paramodo-v1-prd.md` for the frozen scope.
+- v1 implemented. See `daburudoro-v1-prd.md` for the frozen scope.
 
 ## Run it
 

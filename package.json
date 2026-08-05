@@ -1,5 +1,6 @@
 {
-  "name": "paramodo",
+  "name": "daburudoro",
+  "productName": "DaburuDoro",
   "version": "1.0.0",
   "private": true,
   "description": "A floating Pomodoro body-doubling companion for macOS.",

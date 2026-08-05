@@ -16,7 +16,7 @@ function framesFor(state) {
     });
 }
 
-contextBridge.exposeInMainWorld("paramodo", {
+contextBridge.exposeInMainWorld("daburuDoro", {
   characterId: CHARACTER_ID,
   setMousePassthrough: (shouldIgnore) => {
     ipcRenderer.send("set-mouse-passthrough", shouldIgnore);
