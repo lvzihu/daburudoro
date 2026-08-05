@@ -2,22 +2,244 @@
   color-scheme: light;
   font-family: ui-rounded, "SF Pro Rounded", system-ui, sans-serif;
   color: #352d20;
+  --yellow: #f4c84b;
+  --yellow-dark: #c99411;
+  --cream: rgba(255, 250, 224, 0.97);
+  --focus: #e5ad17;
+  --break: #7bb7aa;
+  --idle: #d8c99b;
 }
 
 * { box-sizing: border-box; }
 
-html, body { width: 100%; height: 100%; margin: 0; background: transparent; overflow: hidden; }
-button, input { font: inherit; }
+html,
+body {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+  background: transparent;
+}
 
-.widget { width: 100%; height: 100%; display: grid; grid-template-rows: 18px 180px 1fr; padding: 4px 10px 10px; pointer-events: none; }
-.drag-handle { -webkit-app-region: drag; cursor: grab; text-align: center; color: rgba(53, 45, 32, 0.55); letter-spacing: 4px; user-select: none; pointer-events: auto; }
-.character { width: 100%; height: 180px; object-fit: contain; user-select: none; pointer-events: none; }
-.panel { -webkit-app-region: no-drag; background: rgba(255, 248, 211, 0.94); border: 2px solid #e5bc3b; border-radius: 18px; padding: 10px; box-shadow: 0 6px 20px rgba(81, 59, 0, 0.16); pointer-events: auto; }
-.status-row { display: flex; justify-content: space-between; font-size: 12px; font-weight: 700; }
-.countdown { text-align: center; font-size: 32px; font-variant-numeric: tabular-nums; font-weight: 800; line-height: 1.25; }
-.controls { display: grid; grid-template-columns: 1.2fr repeat(3, 1fr); gap: 5px; align-items: end; }
-label { font-size: 10px; font-weight: 700; }
-input { width: 100%; margin-top: 2px; border: 1px solid #c49b23; border-radius: 7px; padding: 5px; background: #fffdf4; }
-button { border: 0; border-radius: 7px; padding: 6px 2px; background: #f2c84b; color: #352d20; font-size: 10px; font-weight: 800; cursor: pointer; }
-button:disabled { opacity: 0.45; cursor: default; }
-button:hover:not(:disabled) { background: #ffd967; }
+button,
+input { font: inherit; }
+
+button,
+input,
+label { -webkit-app-region: no-drag; }
+
+button { color: inherit; }
+
+.widget {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  grid-template-rows: 238px 14px auto;
+  align-content: start;
+  padding: 4px 14px 12px;
+  pointer-events: none;
+}
+
+.companion-surface {
+  -webkit-app-region: drag;
+  width: 100%;
+  height: 238px;
+  cursor: grab;
+  pointer-events: auto;
+  user-select: none;
+}
+
+.companion-surface:active { cursor: grabbing; }
+
+.character {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  pointer-events: none;
+  user-select: none;
+}
+
+.progress-toggle {
+  -webkit-app-region: no-drag;
+  position: relative;
+  width: calc(100% - 36px);
+  height: 7px;
+  margin: 3px 18px 4px;
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid rgba(83, 65, 21, 0.18);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.72);
+  box-shadow: 0 2px 6px rgba(67, 48, 0, 0.12);
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+.progress-fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 100%;
+  border-radius: inherit;
+  background: var(--idle);
+  transition: width 0.3s linear, background-color 0.2s ease;
+}
+
+.widget[data-phase="focus"] .progress-fill { background: var(--focus); }
+.widget[data-phase="break"] .progress-fill { background: var(--break); }
+.widget[data-phase="complete"] .progress-fill { background: var(--idle); }
+
+.panel {
+  -webkit-app-region: drag;
+  width: 100%;
+  max-height: 178px;
+  margin-top: 7px;
+  padding: 11px 12px 10px;
+  overflow: hidden;
+  border: 2px solid var(--yellow);
+  border-radius: 18px;
+  background: var(--cream);
+  box-shadow: 0 8px 24px rgba(81, 59, 0, 0.18);
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  transform-origin: top center;
+  transition: opacity 0.15s ease, transform 0.15s ease;
+  pointer-events: auto;
+}
+
+.is-collapsed .panel {
+  opacity: 0;
+  transform: translateY(-8px) scale(0.97);
+  pointer-events: none;
+}
+
+.status-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.countdown {
+  margin: -2px 0 3px;
+  text-align: center;
+  font-size: 28px;
+  line-height: 1.12;
+  font-variant-numeric: tabular-nums;
+  font-weight: 850;
+  letter-spacing: -0.5px;
+}
+
+.timer-inputs {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+}
+
+.timer-inputs label {
+  font-size: 9px;
+  font-weight: 800;
+}
+
+.input-with-unit {
+  display: flex;
+  align-items: center;
+  margin-top: 2px;
+  padding-right: 5px;
+  border: 1px solid #c9a02c;
+  border-radius: 7px;
+  background: #fffdf4;
+  font-size: 9px;
+  font-weight: 700;
+}
+
+.input-with-unit input {
+  min-width: 0;
+  width: 100%;
+  padding: 4px 3px 4px 6px;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  font-size: 11px;
+  font-weight: 750;
+}
+
+.input-with-unit:focus-within {
+  border-color: #8a680d;
+  box-shadow: 0 0 0 2px rgba(229, 173, 23, 0.22);
+}
+
+input:disabled { opacity: 0.55; }
+
+.validation {
+  min-height: 12px;
+  margin: 2px 0 1px;
+  color: #a13f27;
+  font-size: 9px;
+  font-weight: 700;
+  text-align: center;
+}
+
+.primary-controls {
+  display: grid;
+  grid-template-columns: 1.15fr repeat(3, 1fr);
+  gap: 5px;
+}
+
+.primary-controls button {
+  min-width: 0;
+  padding: 5px 3px;
+  border: 0;
+  border-radius: 7px;
+  background: var(--yellow);
+  font-size: 10px;
+  font-weight: 850;
+  cursor: pointer;
+}
+
+.primary-controls button.secondary { background: #eee4c0; }
+.primary-controls button:hover:not(:disabled) { filter: brightness(1.06); }
+.primary-controls button:disabled { opacity: 0.42; cursor: default; }
+
+.panel-footer {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 6px;
+  font-size: 9px;
+  font-weight: 750;
+}
+
+.sound-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  margin-right: auto;
+}
+
+.sound-toggle input { margin: 0; accent-color: var(--yellow-dark); }
+
+.text-button {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #705a20;
+  font-size: 9px;
+  font-weight: 800;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+}
+
+.text-button:disabled { opacity: 0.42; cursor: default; }
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
