@@ -16,8 +16,10 @@ built:
 
 - `daburudoro-v1-prd.md` — the v1 build spec (frozen; do not rewrite it).
 - `daburudoro-v2-prd.md` — the frozen daily-usability build spec.
-- `daburudoro-v3-prd.md` / `daburudoro-v4-prd.md` / etc. — future increments,
-  written when we're ready for them.
+- `daburudoro-v3-prd.md` — the frozen characters, activities, and Break-music
+  build spec.
+- `daburudoro-v4-prd.md` / etc. — future increments, written when we're ready
+  for them.
 
 Reason: coding agents build best from small, sharp specs and tend to over-build
 from one big evolving document. Frozen per-version PRDs also leave a dated trail
@@ -48,6 +50,7 @@ must stay publicly defensible. Any personal, real-person-styled asset is a
 - v2 implements the approved `daburudoro-v2-prd.md` scope and was owner-tested
   and accepted for the `v2.0.0` release in
   [PR #1](https://github.com/lvzihu/daburudoro/pull/1).
+- v3 is scoped in `daburudoro-v3-prd.md`; implementation has not started.
 
 ## Version history and build evidence
 
@@ -56,7 +59,8 @@ must stay publicly defensible. Any personal, real-person-styled asset is a
 - [`docs/build-traces/v2-daily-usability.md`](docs/build-traces/v2-daily-usability.md)
   — decisions, implementation sequence, verification, and acceptance gate.
 - [`daburudoro-v1-prd.md`](daburudoro-v1-prd.md) and
-  [`daburudoro-v2-prd.md`](daburudoro-v2-prd.md) — frozen requirements for
+  [`daburudoro-v2-prd.md`](daburudoro-v2-prd.md), and
+  [`daburudoro-v3-prd.md`](daburudoro-v3-prd.md) — frozen requirements for
   comparing intent with each build.
 
 ## Run it
