@@ -12,6 +12,7 @@ future releases and Priscilla's portfolio site.
 | Branch | `feat/v3-characters-audio` |
 | Planning commit | `70812b3 docs: define DaburuDoro v3 scope` |
 | Implementation commit | `bd46c39 feat: add v3 companions and break music` |
+| Acceptance correction | `e494721 fix: rebuild v3 around hand and prop motion` |
 | Base release | [`v2.0.0`](https://github.com/lvzihu/daburudoro/releases/tag/v2.0.0) |
 | Release state | Implementation complete; owner acceptance pending |
 
