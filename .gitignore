@@ -3,6 +3,8 @@ node_modules/
 npm-debug.log*
 tmp/
 dist/
+__pycache__/
+*.pyc
 
 # Personal character replacements stay local. The original yellow v1 art is tracked.
 assets/characters/local-*/

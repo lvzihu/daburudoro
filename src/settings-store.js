@@ -1,5 +1,10 @@
 const fs = require("node:fs");
 const path = require("node:path");
+const { CHARACTER_IDS, isCharacterId } = require("./character-catalog");
+
+function emptyCharacterMap() {
+  return Object.fromEntries(CHARACTER_IDS.map((id) => [id, null]));
+}
 
 const DEFAULT_PREFERENCES = Object.freeze({
   focusMinutes: 35,
@@ -8,11 +13,31 @@ const DEFAULT_PREFERENCES = Object.freeze({
   soundEnabled: true,
   expanded: false,
   windowPosition: null,
+  characterId: "yellow",
+  nextCharacterId: null,
+  musicVolume: 0.7,
+  characterMusic: Object.freeze(emptyCharacterMap()),
 });
 
 function positiveInteger(value, fallback) {
   const numeric = Number(value);
   return Number.isInteger(numeric) && numeric > 0 ? numeric : fallback;
+}
+
+function normalizedVolume(value) {
+  const numeric = Number(value);
+  return Number.isFinite(numeric) && numeric >= 0 && numeric <= 1
+    ? numeric
+    : DEFAULT_PREFERENCES.musicVolume;
+}
+
+function sanitizeCharacterMap(value) {
+  const result = emptyCharacterMap();
+  if (!value || typeof value !== "object") return result;
+  for (const id of CHARACTER_IDS) {
+    result[id] = typeof value[id] === "string" && value[id].length > 0 ? value[id] : null;
+  }
+  return result;
 }
 
 function sanitizePreferences(value = {}) {
@@ -31,6 +56,12 @@ function sanitizePreferences(value = {}) {
     expanded:
       typeof value.expanded === "boolean" ? value.expanded : DEFAULT_PREFERENCES.expanded,
     windowPosition: hasValidPosition ? { x: position.x, y: position.y } : null,
+    characterId: isCharacterId(value.characterId)
+      ? value.characterId
+      : DEFAULT_PREFERENCES.characterId,
+    nextCharacterId: isCharacterId(value.nextCharacterId) ? value.nextCharacterId : null,
+    musicVolume: normalizedVolume(value.musicVolume),
+    characterMusic: sanitizeCharacterMap(value.characterMusic),
   };
 }
 
@@ -46,7 +77,7 @@ class SettingsStore {
       this.preferences = sanitizePreferences(stored);
     } catch (error) {
       if (error.code !== "ENOENT" && error.name !== "SyntaxError") throw error;
-      this.preferences = { ...DEFAULT_PREFERENCES };
+      this.preferences = structuredClone(DEFAULT_PREFERENCES);
     }
     return this.get();
   }
@@ -74,4 +105,10 @@ class SettingsStore {
   }
 }
 
-module.exports = { SettingsStore, DEFAULT_PREFERENCES, sanitizePreferences };
+module.exports = {
+  SettingsStore,
+  DEFAULT_PREFERENCES,
+  emptyCharacterMap,
+  sanitizeCharacterMap,
+  sanitizePreferences,
+};

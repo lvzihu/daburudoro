@@ -4,6 +4,66 @@ All notable changes to DaburuDoro are recorded here. Product requirements are
 kept in separate, frozen PRDs so the intended scope and the shipped result can
 be compared without rewriting history.
 
+## [3.0.0] — 2026-08-06
+
+Released after iterative owner testing and acceptance in
+[#2](https://github.com/lvzihu/daburudoro/pull/2). The separate correction
+commits and dated acceptance documents preserve each feedback round.
+
+### Added
+
+- Five original color companions with gaming, fishing, radio-hosting, computer-work,
+  and movie-directing Focus activities.
+- Character selection before a session and queued selection during Break.
+- Static sleeping Break art and a one-time completion wave for every preset.
+- One private local Break-music assignment per color, automatic playback,
+  remembered global volume, and a five-second ending fade.
+- A compact five-hats companion picker.
+- A visible expand/collapse chevron with a substantially larger hit target.
+- A character-level `×` that hides without stopping the session.
+- Automated character-session, managed-asset, audio-policy, and pointer-region
+  tests.
+
+### Changed
+
+- Focus animation now uses standalone pixel-locked frames: the companion and
+  furniture stay identical while only a hand and its operated prop change.
+- Red now uses the v1-inspired computer-work composition instead of reading.
+- Custom-picture import was removed from v3 and deferred to v5 after the v4 UI
+  redesign.
+- Mouse acceptance is determined from global cursor position and explicit
+  interaction rectangles instead of renderer `mousemove` events.
+- Break music stays owned by the outgoing character when the next character is
+  selected.
+- Character selection is also available after completion, before Start Again.
+
+### Fixed
+
+- Returning directly from the desktop to the character no longer depends on
+  touching the progress bar before dragging.
+- The progress affordance is no longer a seven-pixel-only click target.
+- Timer Pause freezes the Focus artwork animation and pauses Break audio.
+- Native import dialogs no longer collapse the settings popover that opened
+  them.
+- Blue's short-line fishing frame no longer retains the long-line bobber.
+
+### Verified
+
+- 38 automated tests pass.
+- `npm audit` reports zero known vulnerabilities.
+- The application source contains no network calls.
+- A real managed WAV automatically played in Break at its persisted volume.
+- Electron visual captures passed for collapsed, expanded, picker, five-color
+  Ready, Yellow Focus, sleeping Break, and completion-wave states.
+- `electron-builder` produces `DaburuDoro.app` version 3.0.0 for Apple Silicon.
+- The packaged app contains both standalone Focus frames for all five presets
+  and rejects a duplicate launch.
+
+See the [final release notes](docs/releases/v3.0.0-final.md), the preserved
+[draft release notes](docs/releases/v3.0.0.md),
+[engineering build trace](docs/build-traces/v3-characters-audio.md), and
+[final release trace](docs/build-traces/v3-release-2026-08-06.md).
+
 ## [2.0.0] — 2026-08-05
 
 Released after owner testing and acceptance in
@@ -68,5 +128,6 @@ The original build was committed separately from the product rename so both
 steps remain visible in Git history. Version tag:
 [`v1.0.0`](https://github.com/lvzihu/daburudoro/tree/v1.0.0).
 
+[3.0.0]: https://github.com/lvzihu/daburudoro/compare/v2.0.0...feat/v3-characters-audio
 [2.0.0]: https://github.com/lvzihu/daburudoro/releases/tag/v2.0.0
 [1.0.0]: https://github.com/lvzihu/daburudoro/tree/v1.0.0

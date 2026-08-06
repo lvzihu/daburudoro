@@ -18,6 +18,10 @@ test("sanitizes invalid persisted values", () => {
       soundEnabled: "yes",
       expanded: 1,
       windowPosition: { x: "left", y: 20 },
+      characterId: "orange",
+      nextCharacterId: "cyan",
+      musicVolume: 5,
+      characterMusic: { yellow: 42 },
     }),
     DEFAULT_PREFERENCES,
   );
@@ -48,6 +52,9 @@ test("resetTimerDefaults keeps display and window preferences", () => {
     soundEnabled: false,
     expanded: true,
     windowPosition: { x: 100, y: 200 },
+    characterId: "purple",
+    musicVolume: 0.25,
+    characterMusic: { purple: "/managed/purple.mp3" },
   });
 
   const preferences = store.resetTimerDefaults();
@@ -57,4 +64,22 @@ test("resetTimerDefaults keeps display and window preferences", () => {
   assert.equal(preferences.soundEnabled, true);
   assert.equal(preferences.expanded, true);
   assert.deepEqual(preferences.windowPosition, { x: 100, y: 200 });
+  assert.equal(preferences.characterId, "purple");
+  assert.equal(preferences.musicVolume, 0.25);
+  assert.equal(preferences.characterMusic.purple, "/managed/purple.mp3");
+});
+
+test("sanitizes character selection and managed music", () => {
+  const preferences = sanitizePreferences({
+    characterId: "blue",
+    nextCharacterId: "red",
+    musicVolume: 0,
+    characterMusic: { blue: "/managed/blue.m4a", unknown: "/tmp/nope" },
+  });
+
+  assert.equal(preferences.characterId, "blue");
+  assert.equal(preferences.nextCharacterId, "red");
+  assert.equal(preferences.musicVolume, 0);
+  assert.equal(preferences.characterMusic.blue, "/managed/blue.m4a");
+  assert.equal(preferences.characterMusic.unknown, undefined);
 });

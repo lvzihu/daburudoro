@@ -1,9 +1,9 @@
 # DaburuDoro
 
 A floating, always-on-top desktop **Pomodoro companion** that gives a
-body-doubling feeling: a cartoon character that visibly "works" (typing) while
-you work and does a break activity (piano) on breaks, mirroring your timer.
-macOS, Electron. Personal, non-commercial.
+body-doubling feeling: choose an original cartoon companion with its own Focus
+activity, then let it sleep while your local Break music plays. macOS, Electron.
+Personal, non-commercial.
 
 ## How this project is specced and versioned
 
@@ -16,8 +16,12 @@ built:
 
 - `daburudoro-v1-prd.md` — the v1 build spec (frozen; do not rewrite it).
 - `daburudoro-v2-prd.md` — the frozen daily-usability build spec.
-- `daburudoro-v3-prd.md` / `daburudoro-v4-prd.md` / etc. — future increments,
-  written when we're ready for them.
+- `daburudoro-v3-prd.md` — the frozen characters, activities, and Break-music
+  build spec.
+- `daburudoro-v3-acceptance-amendment-2026-08-06.md` — owner-test corrections
+  recorded separately without rewriting the frozen v3 PRD.
+- `daburudoro-v4-prd.md` / etc. — future increments, written when we're ready
+  for them.
 
 Reason: coding agents build best from small, sharp specs and tend to over-build
 from one big evolving document. Frozen per-version PRDs also leave a dated trail
@@ -39,8 +43,8 @@ distinguished only by each one's signature color (blue, red, green, yellow,
 purple). **Never** name or make identifiable any real person / group in the
 code, assets, filenames, commits, or docs — the repo is portfolio material and
 must stay publicly defensible. Any personal, real-person-styled asset is a
-**local, untracked drop-in only** (characters load from
-`assets/characters/<id>/`, so swapping art needs no code change).
+**local and untracked only**. A product-facing custom-picture workflow is
+deferred to v5, after the v4 UI redesign.
 
 ## Status
 
@@ -48,16 +52,30 @@ must stay publicly defensible. Any personal, real-person-styled asset is a
 - v2 implements the approved `daburudoro-v2-prd.md` scope and was owner-tested
   and accepted for the `v2.0.0` release in
   [PR #1](https://github.com/lvzihu/daburudoro/pull/1).
+- v3 implements the frozen `daburudoro-v3-prd.md` scope, passed owner testing,
+  and was approved for the `v3.0.0` release in
+  [PR #2](https://github.com/lvzihu/daburudoro/pull/2).
 
 ## Version history and build evidence
 
 - [`CHANGELOG.md`](CHANGELOG.md) — reader-friendly improvements by version.
 - [`docs/releases/v2.0.0.md`](docs/releases/v2.0.0.md) — v2 release notes.
+- [`docs/releases/v3.0.0-final.md`](docs/releases/v3.0.0-final.md) — accepted v3
+  release notes; the earlier draft remains preserved separately.
 - [`docs/build-traces/v2-daily-usability.md`](docs/build-traces/v2-daily-usability.md)
   — decisions, implementation sequence, verification, and acceptance gate.
+- [`docs/build-traces/v3-characters-audio.md`](docs/build-traces/v3-characters-audio.md)
+  — the v3 engineering and visual-production trace.
+- [`docs/build-traces/v3-release-2026-08-06.md`](docs/build-traces/v3-release-2026-08-06.md)
+  — final acceptance, correction commits, and release-version rationale.
+- [`docs/art-direction/v3-character-sprites.md`](docs/art-direction/v3-character-sprites.md)
+  — reproducible character prompt set and asset rules.
 - [`daburudoro-v1-prd.md`](daburudoro-v1-prd.md) and
-  [`daburudoro-v2-prd.md`](daburudoro-v2-prd.md) — frozen requirements for
+  [`daburudoro-v2-prd.md`](daburudoro-v2-prd.md), and
+  [`daburudoro-v3-prd.md`](daburudoro-v3-prd.md) — frozen requirements for
   comparing intent with each build.
+- [`daburudoro-v3-acceptance-amendment-2026-08-06.md`](daburudoro-v3-acceptance-amendment-2026-08-06.md)
+  — acceptance changes discovered without overwriting the v3 PRD.
 
 ## Run it
 
@@ -68,7 +86,7 @@ npm install
 npm start
 ```
 
-Run the timer-state tests with `npm test`.
+Run all deterministic tests with `npm test`.
 
 ## Build the macOS app
 
@@ -83,27 +101,40 @@ Spotlight, or the Dock without opening a terminal.
 This development build is not notarized. If macOS blocks its first launch,
 Control-click the app in Applications, choose **Open**, then confirm **Open**.
 
-## Use v2
+## Use v3
 
 - Drag the character to move the entire widget. DaburuDoro remembers the last
   visible position and recovers to the main screen if a monitor is removed.
-- Click the thin line beneath the character to open or collapse the controls.
+- Click the centered chevron beneath the character to open or collapse the
+  controls. Its generous hit area includes the progress line.
 - Set whole-minute Focus and Break durations plus the number of Cycles. Every
   cycle includes its break, including the final cycle.
 - Hide and restore the widget from either its control panel or the DaburuDoro
-  menu-bar icon. The active timer continues while hidden.
+  menu-bar icon, or click the character-level `×`. The active timer and Break
+  music continue while hidden.
 - The menu-bar icon provides **Show Widget**, **Hide Widget**,
   **Restart Session**, and **Quit DaburuDoro**.
 - Native notifications and one gentle chime mark phase transitions. Sound can
   be turned off in the control panel.
+- Choose one of five color companions before starting. During Break, use the
+  five-hats control to queue a different companion for the next Focus block.
+- Each companion has one Focus activity: gaming, fishing, radio hosting,
+  computer work, or directing. All five sleep during Break.
+- In companion settings, assign one local MP3, M4A, or WAV file to each color.
+  The outgoing character's music starts automatically, plays once, and fades
+  during the final five seconds. One global volume is remembered.
 - Quit ends the active session. The next launch restores settings and position,
   but begins idle.
 
-## Character assets
+## Character and media assets
 
-- Character frames are discovered by filename from
-  `assets/characters/yellow/`. Replace `working-*.png`, `break-*.png`, and
-  `idle-*.png` to change the art without editing code.
-- Focus uses the typing loop, Break uses the piano loop, and Ready/Complete uses
-  the standing-and-waving loop.
-- The widget passes mouse clicks through its transparent/non-control area.
+- Original generated sprite sheets live at `assets/characters/<color>/sheet.png`.
+  Runtime Focus uses standalone `focus-1.png` and `focus-2.png` assets so an
+  adjacent sprite cell cannot bleed into the current frame.
+- Focus locks the body and furniture pixel-for-pixel while a working hand and
+  its prop change: controller, fishing line/bobber, mixer pad, keyboard, or
+  director monitor.
+- User-imported music is copied to Electron's private app-data directory. It
+  never enters the repository, packaged app, or GitHub Release.
+- Transparent areas outside active interaction rectangles pass clicks through;
+  the character, controls, and panel remain reliably draggable or clickable.
