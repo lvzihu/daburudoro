@@ -58,6 +58,8 @@ deferred to v5, after the v4 UI redesign.
 
 ## Version history and build evidence
 
+- [`docs/product-roadmap.md`](docs/product-roadmap.md) — public, no-date product
+  direction after v3; planned work is separated from exploration.
 - [`CHANGELOG.md`](CHANGELOG.md) — reader-friendly improvements by version.
 - [`docs/releases/v2.0.0.md`](docs/releases/v2.0.0.md) — v2 release notes.
 - [`docs/releases/v3.0.0-final.md`](docs/releases/v3.0.0-final.md) — accepted v3

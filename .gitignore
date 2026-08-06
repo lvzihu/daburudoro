@@ -8,3 +8,6 @@ __pycache__/
 
 # Personal character replacements stay local. The original yellow v1 art is tracked.
 assets/characters/local-*/
+
+# Private source material for a future personal-website case study.
+docs/portfolio/
