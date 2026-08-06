@@ -22,7 +22,6 @@ test("sanitizes invalid persisted values", () => {
       nextCharacterId: "cyan",
       musicVolume: 5,
       characterMusic: { yellow: 42 },
-      characterArtwork: "nope",
     }),
     DEFAULT_PREFERENCES,
   );
@@ -56,7 +55,6 @@ test("resetTimerDefaults keeps display and window preferences", () => {
     characterId: "purple",
     musicVolume: 0.25,
     characterMusic: { purple: "/managed/purple.mp3" },
-    characterArtwork: { purple: "/managed/purple.png" },
   });
 
   const preferences = store.resetTimerDefaults();
@@ -69,16 +67,14 @@ test("resetTimerDefaults keeps display and window preferences", () => {
   assert.equal(preferences.characterId, "purple");
   assert.equal(preferences.musicVolume, 0.25);
   assert.equal(preferences.characterMusic.purple, "/managed/purple.mp3");
-  assert.equal(preferences.characterArtwork.purple, "/managed/purple.png");
 });
 
-test("sanitizes character selection and managed asset maps", () => {
+test("sanitizes character selection and managed music", () => {
   const preferences = sanitizePreferences({
     characterId: "blue",
     nextCharacterId: "red",
     musicVolume: 0,
     characterMusic: { blue: "/managed/blue.m4a", unknown: "/tmp/nope" },
-    characterArtwork: { red: "/managed/red.webp" },
   });
 
   assert.equal(preferences.characterId, "blue");
@@ -86,5 +82,4 @@ test("sanitizes character selection and managed asset maps", () => {
   assert.equal(preferences.musicVolume, 0);
   assert.equal(preferences.characterMusic.blue, "/managed/blue.m4a");
   assert.equal(preferences.characterMusic.unknown, undefined);
-  assert.equal(preferences.characterArtwork.red, "/managed/red.webp");
 });

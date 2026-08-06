@@ -17,7 +17,6 @@ const DEFAULT_PREFERENCES = Object.freeze({
   nextCharacterId: null,
   musicVolume: 0.7,
   characterMusic: Object.freeze(emptyCharacterMap()),
-  characterArtwork: Object.freeze(emptyCharacterMap()),
 });
 
 function positiveInteger(value, fallback) {
@@ -63,7 +62,6 @@ function sanitizePreferences(value = {}) {
     nextCharacterId: isCharacterId(value.nextCharacterId) ? value.nextCharacterId : null,
     musicVolume: normalizedVolume(value.musicVolume),
     characterMusic: sanitizeCharacterMap(value.characterMusic),
-    characterArtwork: sanitizeCharacterMap(value.characterArtwork),
   };
 }
 

@@ -158,19 +158,9 @@ async function captureDevelopmentView() {
 
 function managedAssetSnapshot() {
   const preferences = settingsStore.get();
-  const artwork = {};
   const music = {};
 
   for (const id of CHARACTER_IDS) {
-    const imagePath = preferences.characterArtwork[id];
-    if (assetManager.isManagedImage(imagePath) && fs.existsSync(imagePath)) {
-      const extension = path.extname(imagePath).toLowerCase();
-      const mime = extension === ".png" ? "image/png" : extension === ".webp" ? "image/webp" : "image/jpeg";
-      artwork[id] = `data:${mime};base64,${fs.readFileSync(imagePath).toString("base64")}`;
-    } else {
-      artwork[id] = null;
-    }
-
     const audioPath = preferences.characterMusic[id];
     music[id] =
       assetManager.isManagedAudio(audioPath) && fs.existsSync(audioPath)
@@ -178,7 +168,7 @@ function managedAssetSnapshot() {
         : null;
   }
 
-  return { artwork, music };
+  return { music };
 }
 
 function rendererPreferenceUpdate(partial = {}) {
@@ -196,49 +186,38 @@ function rendererPreferenceUpdate(partial = {}) {
   return Object.fromEntries(allowed.filter((key) => key in partial).map((key) => [key, partial[key]]));
 }
 
-async function importManagedAsset(kind, characterId) {
+async function importMusic(characterId) {
   if (!isCharacterId(characterId)) throw new RangeError("Unknown character.");
-  const isImage = kind === "artwork";
   modalInteractionOpen = true;
   let result;
   try {
     result = await dialog.showOpenDialog(mainWindow, {
-      title: isImage ? `Choose ${characterId} artwork` : `Choose ${characterId} Break music`,
+      title: `Choose ${characterId} Break music`,
       properties: ["openFile"],
-      filters: isImage
-        ? [{ name: "Images", extensions: ["png", "jpg", "jpeg", "webp"] }]
-        : [{ name: "Audio", extensions: ["mp3", "m4a", "wav"] }],
+      filters: [{ name: "Audio", extensions: ["mp3", "m4a", "wav"] }],
     });
   } finally {
     modalInteractionOpen = false;
   }
   if (result.canceled || !result.filePaths[0]) return managedAssetSnapshot();
 
-  const key = isImage ? "characterArtwork" : "characterMusic";
-  const previous = settingsStore.get()[key][characterId];
-  const imported = isImage
-    ? assetManager.importImage(characterId, result.filePaths[0])
-    : assetManager.importAudio(characterId, result.filePaths[0]);
-  const nextMap = { ...settingsStore.get()[key], [characterId]: imported };
-  settingsStore.save({ [key]: nextMap });
-  const previousIsManaged = isImage
-    ? assetManager.isManagedImage(previous)
-    : assetManager.isManagedAudio(previous);
-  if (previous && previous !== imported && previousIsManaged) assetManager.remove(previous);
+  const previous = settingsStore.get().characterMusic[characterId];
+  const imported = assetManager.importAudio(characterId, result.filePaths[0]);
+  const nextMap = { ...settingsStore.get().characterMusic, [characterId]: imported };
+  settingsStore.save({ characterMusic: nextMap });
+  if (previous && previous !== imported && assetManager.isManagedAudio(previous)) {
+    assetManager.remove(previous);
+  }
   return managedAssetSnapshot();
 }
 
-function removeManagedAsset(kind, characterId) {
+function removeMusic(characterId) {
   if (!isCharacterId(characterId)) throw new RangeError("Unknown character.");
-  const key = kind === "artwork" ? "characterArtwork" : "characterMusic";
   const preferences = settingsStore.get();
-  const previous = preferences[key][characterId];
-  const nextMap = { ...preferences[key], [characterId]: null };
-  settingsStore.save({ [key]: nextMap });
-  const previousIsManaged = kind === "artwork"
-    ? assetManager.isManagedImage(previous)
-    : assetManager.isManagedAudio(previous);
-  if (previous && previousIsManaged) assetManager.remove(previous);
+  const previous = preferences.characterMusic[characterId];
+  const nextMap = { ...preferences.characterMusic, [characterId]: null };
+  settingsStore.save({ characterMusic: nextMap });
+  if (previous && assetManager.isManagedAudio(previous)) assetManager.remove(previous);
   return managedAssetSnapshot();
 }
 
@@ -367,17 +346,11 @@ ipcMain.handle("preferences:reset-defaults", () => settingsStore.resetTimerDefau
 ipcMain.handle("session:confirm-reset", () => confirmEndSession());
 ipcMain.handle("widget:hide", () => hideWidget());
 ipcMain.handle("assets:get", () => managedAssetSnapshot());
-ipcMain.handle("assets:import-artwork", (_event, characterId) =>
-  importManagedAsset("artwork", characterId),
-);
-ipcMain.handle("assets:remove-artwork", (_event, characterId) =>
-  removeManagedAsset("artwork", characterId),
-);
 ipcMain.handle("assets:import-music", (_event, characterId) =>
-  importManagedAsset("music", characterId),
+  importMusic(characterId),
 );
 ipcMain.handle("assets:remove-music", (_event, characterId) =>
-  removeManagedAsset("music", characterId),
+  removeMusic(characterId),
 );
 ipcMain.handle("notification:show", (_event, { body }) => {
   if (!Notification.isSupported()) return false;

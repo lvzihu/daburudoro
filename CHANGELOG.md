@@ -11,13 +11,12 @@ owner completes the five-cycle acceptance test and merges the v3 pull request.
 
 ### Added
 
-- Five original color companions with gaming, fishing, radio-hosting, reading,
+- Five original color companions with gaming, fishing, radio-hosting, computer-work,
   and movie-directing Focus activities.
 - Character selection before a session and queued selection during Break.
 - Static sleeping Break art and a one-time completion wave for every preset.
 - One private local Break-music assignment per color, automatic playback,
   remembered global volume, and a five-second ending fade.
-- Private static PNG, JPG/JPEG, and WEBP substitution for any preset slot.
 - A compact five-hats companion picker.
 - A visible expand/collapse chevron with a substantially larger hit target.
 - A character-level `×` that hides without stopping the session.
@@ -26,8 +25,11 @@ owner completes the five-cycle acceptance test and merges the v3 pull request.
 
 ### Changed
 
-- Focus animation now uses pixel-locked derivative sheets: the companion and
-  furniture stay identical while only a rasterized activity detail changes.
+- Focus animation now uses standalone pixel-locked frames: the companion and
+  furniture stay identical while only a hand and its operated prop change.
+- Red now uses the v1-inspired computer-work composition instead of reading.
+- Custom-picture import was removed from v3 and deferred to v5 after the v4 UI
+  redesign.
 - Mouse acceptance is determined from global cursor position and explicit
   interaction rectangles instead of renderer `mousemove` events.
 - Break music stays owned by the outgoing character when the next character is
@@ -42,6 +44,7 @@ owner completes the five-cycle acceptance test and merges the v3 pull request.
 - Timer Pause freezes the Focus artwork animation and pauses Break audio.
 - Native import dialogs no longer collapse the settings popover that opened
   them.
+- Blue's short-line fishing frame no longer retains the long-line bobber.
 
 ### Verified so far
 
@@ -52,7 +55,8 @@ owner completes the five-cycle acceptance test and merges the v3 pull request.
 - Electron visual captures passed for collapsed, expanded, picker, five-color
   Ready, Yellow Focus, sleeping Break, and completion-wave states.
 - `electron-builder` produces `DaburuDoro.app` version 3.0.0 for Apple Silicon.
-- The packaged app contains all five sheets and rejects a duplicate launch.
+- The packaged app contains both standalone Focus frames for all five presets
+  and rejects a duplicate launch.
 
 See the [draft release notes](docs/releases/v3.0.0.md),
 [engineering build trace](docs/build-traces/v3-characters-audio.md), and

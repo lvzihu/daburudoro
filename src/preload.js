@@ -66,8 +66,6 @@ contextBridge.exposeInMainWorld("daburuDoro", {
   confirmReset: () => ipcRenderer.invoke("session:confirm-reset"),
   hideWidget: () => ipcRenderer.invoke("widget:hide"),
   getManagedAssets: () => ipcRenderer.invoke("assets:get"),
-  importArtwork: (characterId) => ipcRenderer.invoke("assets:import-artwork", characterId),
-  removeArtwork: (characterId) => ipcRenderer.invoke("assets:remove-artwork", characterId),
   importMusic: (characterId) => ipcRenderer.invoke("assets:import-music", characterId),
   removeMusic: (characterId) => ipcRenderer.invoke("assets:remove-music", characterId),
   showNotification: (body) => ipcRenderer.invoke("notification:show", { body }),

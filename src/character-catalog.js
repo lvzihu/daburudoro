@@ -19,7 +19,7 @@ const CHARACTER_CATALOG = Object.freeze({
   red: Object.freeze({
     id: "red",
     label: "Red",
-    activity: "Reading books",
+    activity: "Working on a computer",
   }),
   purple: Object.freeze({
     id: "purple",

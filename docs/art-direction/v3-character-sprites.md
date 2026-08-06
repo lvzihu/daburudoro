@@ -71,20 +71,31 @@ A targeted built-in image edit was also rejected: despite an explicit locked
 master and change-only-the-controller constraint, it rescaled and redrew Yellow.
 The generated experiment was not copied into the project.
 
-The accepted pipeline is deterministic. `scripts/build-locked-focus-sheets.py`
-starts Focus B as an exact copy of Focus A and changes only the declared
-activity region:
+The first deterministic candidate still did not satisfy owner acceptance:
+Yellow and Green replaced hand motion with colored indicators, Blue appeared to
+retain the long-line bobber during the short-line state, and Red's synthetic
+page crossed the book unnaturally.
 
-- Yellow: controller buttons light in sequence.
-- Blue: the bobber rises on the fixed fishing line.
-- Green: the mixer meters change level.
-- Red: one page lifts from the fixed book.
-- Purple: the monitor recording light turns on while the director watches.
+The accepted revision is recorded separately in
+[`daburudoro-v3-acceptance-amendment-2026-08-06.md`](../../daburudoro-v3-acceptance-amendment-2026-08-06.md).
+`scripts/build-locked-focus-sheets.py` now writes standalone `focus-1.png` and
+`focus-2.png` files instead of depending on sprite-sheet positions:
 
-It writes `sheet-locked.png` beside—not over—each original `sheet.png`, plus
-side-by-side QA evidence in `artifacts/v3-focus-lock-qa/`. The script fails if
-any pixel changes outside the activity polygon.
+- Yellow: the generated hands and controller change together.
+- Blue: one line/bobber moves upward; an assertion rejects any old bobber pixel
+  in the short-line region.
+- Green: the hand presses the mixer pad.
+- Red: the successful v1 computer-work composition is recolored red and only
+  its typing-hand region changes.
+- Purple: the owner-approved director/recording state remains unchanged.
 
-The universal two-frame CSS animation stops with Timer Pause and resumes with
-the timer. Body, face, clothing, lower-body baseline, chair, desk, and monitor
-remain identical between Focus frames.
+The new side-by-side evidence lives in `artifacts/v3-focus-hands-qa/`; the
+earlier `artifacts/v3-focus-lock-qa/` evidence is preserved as rejected-history
+evidence. The script fails if any pixel changes outside the declared hand/prop
+polygon.
+
+JavaScript keeps both standalone files mounted and decoded, toggles which
+complete frame is visible, and stops advancing the frame index while Timer
+Pause is active. This avoids partial paints during a data-URL source change.
+Body, face, clothing, lower-body baseline, chair, desk, and monitor remain
+identical between Focus frames.

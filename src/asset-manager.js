@@ -3,7 +3,6 @@ const fs = require("node:fs");
 const path = require("node:path");
 const { isCharacterId } = require("./character-catalog");
 
-const IMAGE_EXTENSIONS = new Set([".png", ".jpg", ".jpeg", ".webp"]);
 const AUDIO_EXTENSIONS = new Set([".mp3", ".m4a", ".wav"]);
 
 function managedAssetName(characterId, sourcePath) {
@@ -19,25 +18,9 @@ function isInside(root, candidate) {
 }
 
 class AssetManager {
-  constructor(rootPath, { validateImage } = {}) {
+  constructor(rootPath) {
     this.rootPath = rootPath;
-    this.imageRoot = path.join(rootPath, "images");
     this.audioRoot = path.join(rootPath, "audio");
-    this.validateImage =
-      validateImage ||
-      ((buffer) => {
-        const { nativeImage } = require("electron");
-        return !nativeImage.createFromBuffer(buffer).isEmpty();
-      });
-  }
-
-  importImage(characterId, sourcePath) {
-    const extension = path.extname(sourcePath).toLowerCase();
-    if (!IMAGE_EXTENSIONS.has(extension)) throw new RangeError("Choose a PNG, JPG, or WEBP image.");
-    if (!this.validateImage(fs.readFileSync(sourcePath))) {
-      throw new RangeError("The selected file is not a readable image.");
-    }
-    return this.copyManaged(characterId, sourcePath, this.imageRoot);
   }
 
   importAudio(characterId, sourcePath) {
@@ -58,17 +41,13 @@ class AssetManager {
   remove(filePath) {
     if (!filePath) return;
     const resolved = path.resolve(filePath);
-    const isManaged = isInside(this.imageRoot, resolved) || isInside(this.audioRoot, resolved);
+    const isManaged = isInside(this.audioRoot, resolved);
     if (!isManaged) throw new RangeError("Refusing to remove an unmanaged file.");
     try {
       fs.unlinkSync(resolved);
     } catch (error) {
       if (error.code !== "ENOENT") throw error;
     }
-  }
-
-  isManagedImage(filePath) {
-    return Boolean(filePath) && isInside(this.imageRoot, path.resolve(filePath));
   }
 
   isManagedAudio(filePath) {
@@ -79,7 +58,6 @@ class AssetManager {
 module.exports = {
   AssetManager,
   AUDIO_EXTENSIONS,
-  IMAGE_EXTENSIONS,
   isInside,
   managedAssetName,
 };

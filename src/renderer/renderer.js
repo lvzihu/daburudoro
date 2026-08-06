@@ -16,9 +16,6 @@ const elements = {
   musicFile: document.querySelector("#music-file"),
   musicVolume: document.querySelector("#music-volume"),
   musicVolumeOutput: document.querySelector("#music-volume-output"),
-  chooseArtwork: document.querySelector("#choose-artwork"),
-  removeArtwork: document.querySelector("#remove-artwork"),
-  artworkStatus: document.querySelector("#artwork-status"),
   assetError: document.querySelector("#asset-error"),
   progressHandle: document.querySelector("#progress-handle"),
   progressToggle: document.querySelector("#progress-toggle"),
@@ -51,7 +48,7 @@ const CHARACTER_COLORS = {
 };
 
 let preferences;
-let managedAssets = { artwork: {}, music: {} };
+let managedAssets = { music: {} };
 let timer;
 let characterSession;
 let settingsCharacterId = "yellow";
@@ -61,6 +58,7 @@ let audioContext;
 let lastReportedSessionActive;
 let breakAudioToken = 0;
 const breakAudio = new Audio();
+const focusFrameElements = new Map();
 
 function formatTime(totalSeconds) {
   const minutes = Math.floor(totalSeconds / 60);
@@ -195,16 +193,38 @@ function characterFrames(characterId, stateName) {
   return fallback[stateName]?.length ? fallback[stateName] : fallback.ready || [];
 }
 
+async function mountFocusFrames() {
+  const decodeTasks = [];
+  for (const [characterId, assets] of Object.entries(window.daburuDoro.frames)) {
+    for (const [index, url] of (assets.focus || []).entries()) {
+      const image = new Image();
+      image.className = "character focus-frame is-hidden";
+      image.alt = "";
+      image.draggable = false;
+      image.src = url;
+      elements.companionSurface.prepend(image);
+      focusFrameElements.set(`${characterId}:${index}`, image);
+      decodeTasks.push(image.decode().catch(() => undefined));
+    }
+  }
+
+  await Promise.all(decodeTasks);
+}
+
 function renderCharacter(state) {
   const id = characterSession.activeCharacterId;
-  const customImage = managedAssets.artwork[id];
   const assets = window.daburuDoro.frames[id] || {};
+  for (const image of focusFrameElements.values()) image.classList.add("is-hidden");
   elements.characterSprite.classList.add("is-hidden");
   elements.character.classList.remove("is-hidden");
 
-  if (customImage && state.phase !== "break") {
-    elements.character.src = customImage;
-    return;
+  if (state.phase === "focus" && assets.focus?.length) {
+    const focusFrame = focusFrameElements.get(`${id}:${frameIndex % assets.focus.length}`);
+    if (focusFrame) {
+      elements.character.classList.add("is-hidden");
+      focusFrame.classList.remove("is-hidden");
+      return;
+    }
   }
 
   if (assets.sheet) {
@@ -302,11 +322,8 @@ function renderCharacterPicker(state) {
     : `Selected: ${window.daburuDoro.characters[snapshot.activeCharacterId].label}`;
 
   const music = managedAssets.music[settingsCharacterId];
-  const artwork = managedAssets.artwork[settingsCharacterId];
   elements.musicFile.textContent = music ? "Break music assigned" : "No Break music assigned";
   elements.removeMusic.disabled = !music;
-  elements.artworkStatus.textContent = artwork ? "Using a private custom image" : "Using preset artwork";
-  elements.removeArtwork.disabled = !artwork;
   elements.musicVolume.value = String(Math.round(preferences.musicVolume * 100));
   elements.musicVolumeOutput.textContent = `${Math.round(preferences.musicVolume * 100)}%`;
 
@@ -470,8 +487,6 @@ elements.musicVolume.addEventListener("change", async () => {
 
 elements.chooseMusic.addEventListener("click", () => updateManagedAsset(window.daburuDoro.importMusic));
 elements.removeMusic.addEventListener("click", () => updateManagedAsset(window.daburuDoro.removeMusic));
-elements.chooseArtwork.addEventListener("click", () => updateManagedAsset(window.daburuDoro.importArtwork));
-elements.removeArtwork.addEventListener("click", () => updateManagedAsset(window.daburuDoro.removeArtwork));
 
 elements.defaults.addEventListener("click", async () => {
   preferences = await window.daburuDoro.resetDefaults();
@@ -528,6 +543,7 @@ new ResizeObserver(scheduleInteractionRegions).observe(elements.widget);
 async function initialize() {
   preferences = await window.daburuDoro.getPreferences();
   managedAssets = await window.daburuDoro.getManagedAssets();
+  await mountFocusFrames();
   elements.focusMinutes.value = preferences.focusMinutes;
   elements.breakMinutes.value = preferences.breakMinutes;
   elements.cycles.value = preferences.totalCycles;

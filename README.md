@@ -18,6 +18,8 @@ built:
 - `daburudoro-v2-prd.md` — the frozen daily-usability build spec.
 - `daburudoro-v3-prd.md` — the frozen characters, activities, and Break-music
   build spec.
+- `daburudoro-v3-acceptance-amendment-2026-08-06.md` — owner-test corrections
+  recorded separately without rewriting the frozen v3 PRD.
 - `daburudoro-v4-prd.md` / etc. — future increments, written when we're ready
   for them.
 
@@ -41,8 +43,8 @@ distinguished only by each one's signature color (blue, red, green, yellow,
 purple). **Never** name or make identifiable any real person / group in the
 code, assets, filenames, commits, or docs — the repo is portfolio material and
 must stay publicly defensible. Any personal, real-person-styled asset is a
-**local, untracked drop-in only** (characters load from
-`assets/characters/<id>/`, so swapping art needs no code change).
+**local and untracked only**. A product-facing custom-picture workflow is
+deferred to v5, after the v4 UI redesign.
 
 ## Status
 
@@ -68,6 +70,8 @@ must stay publicly defensible. Any personal, real-person-styled asset is a
   [`daburudoro-v2-prd.md`](daburudoro-v2-prd.md), and
   [`daburudoro-v3-prd.md`](daburudoro-v3-prd.md) — frozen requirements for
   comparing intent with each build.
+- [`daburudoro-v3-acceptance-amendment-2026-08-06.md`](daburudoro-v3-acceptance-amendment-2026-08-06.md)
+  — acceptance changes discovered without overwriting the v3 PRD.
 
 ## Run it
 
@@ -111,24 +115,22 @@ Control-click the app in Applications, choose **Open**, then confirm **Open**.
 - Choose one of five color companions before starting. During Break, use the
   five-hats control to queue a different companion for the next Focus block.
 - Each companion has one Focus activity: gaming, fishing, radio hosting,
-  reading, or directing. All five sleep during Break.
+  computer work, or directing. All five sleep during Break.
 - In companion settings, assign one local MP3, M4A, or WAV file to each color.
   The outgoing character's music starts automatically, plays once, and fades
   during the final five seconds. One global volume is remembered.
-- A private PNG, JPG/JPEG, or WEBP can replace a color slot's Ready and Focus
-  image. Break still uses that preset color's sleeping illustration.
 - Quit ends the active session. The next launch restores settings and position,
   but begins idle.
 
 ## Character and media assets
 
 - Original generated sprite sheets live at `assets/characters/<color>/sheet.png`.
-  Runtime uses the non-destructive `sheet-locked.png` derivative beside each
-  original.
-- Focus locks the character, lower body, and furniture pixel-for-pixel while
-  only the activity changes: controller buttons, fishing bobber, mixer meters,
-  book page, or monitor recording light.
-- User-imported images and music are copied to Electron's private app-data
-  directory. They never enter the repository, packaged app, or GitHub Release.
+  Runtime Focus uses standalone `focus-1.png` and `focus-2.png` assets so an
+  adjacent sprite cell cannot bleed into the current frame.
+- Focus locks the body and furniture pixel-for-pixel while a working hand and
+  its prop change: controller, fishing line/bobber, mixer pad, keyboard, or
+  director monitor.
+- User-imported music is copied to Electron's private app-data directory. It
+  never enters the repository, packaged app, or GitHub Release.
 - Transparent areas outside active interaction rectangles pass clicks through;
   the character, controls, and panel remain reliably draggable or clickable.

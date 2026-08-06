@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
-"""Build Focus sheets whose non-activity pixels are locked to frame one.
+"""Build standalone Focus frames whose non-activity pixels are locked.
 
 Run with the bundled Codex Python runtime (Pillow and NumPy are required):
 
     python scripts/build-locked-focus-sheets.py
 
-The generated `sheet-locked.png` files preserve the source sheets. Each Focus
-frame B starts as an exact copy of frame A, then receives only a feathered patch
-inside the character-specific activity region.
+The generated `focus-1.png` and `focus-2.png` files preserve every source sheet.
+Each Focus frame B starts as an exact copy of frame A, then receives only a
+feathered patch inside the character-specific hand/prop activity region.
 """
 
 from pathlib import Path
@@ -22,12 +22,12 @@ CHARACTER_ROOT = ROOT / "assets" / "characters"
 FRAME_SIZE = 512
 
 # Polygons cover only the activity: controller/hands, rod/bobber, mixer hand,
-# book pages, and clapboard. Body pixels outside these regions cannot change.
+# typing hands, and the director's monitor. Pixels outside cannot change.
 ACTIVITY_REGIONS = {
     "yellow": [(145, 310), (370, 310), (370, 415), (145, 415)],
     "blue": [(410, 205), (455, 205), (455, 440), (410, 440)],
     "green": [(255, 315), (390, 315), (390, 425), (255, 425)],
-    "red": [(140, 275), (370, 275), (370, 385), (140, 385)],
+    "red": [(155, 215), (325, 215), (325, 335), (155, 335)],
     "purple": [(405, 275), (455, 275), (455, 330), (405, 330)],
 }
 
@@ -81,45 +81,59 @@ def patched_alternate(master: Image.Image, alternate: Image.Image, activity: Ima
     return Image.composite(aligned, master, patch_mask), offset
 
 
-def yellow_alternate(master: Image.Image) -> Image.Image:
-    result = master.copy()
-    draw = ImageDraw.Draw(result)
-    outline = (67, 38, 24, 255)
-    draw.ellipse((284, 348, 296, 360), fill=(246, 196, 52, 255), outline=outline, width=2)
-    draw.ellipse((298, 348, 310, 360), fill=(94, 174, 226, 255), outline=outline, width=2)
-    draw.ellipse((284, 362, 296, 374), fill=(106, 201, 112, 255), outline=outline, width=2)
-    draw.ellipse((298, 362, 310, 374), fill=(236, 102, 74, 255), outline=outline, width=2)
-    return result
-
-
 def blue_alternate(master: Image.Image) -> Image.Image:
     result = master.copy()
     bobber = master.crop((414, 382, 449, 433))
     draw = ImageDraw.Draw(result)
-    draw.rectangle((424, 219, 450, 438), fill=(0, 0, 0, 0))
+    draw.rectangle((410, 219, 455, 440), fill=(0, 0, 0, 0))
     draw.line((431, 216, 431, 313), fill=(72, 48, 37, 255), width=2)
     result.alpha_composite(bobber, (414, 300))
+    if result.getchannel("A").crop((414, 382, 449, 433)).getbbox() is not None:
+        raise RuntimeError("Blue: long-line bobber remained in the short-line frame")
     return result
 
 
-def green_alternate(master: Image.Image) -> Image.Image:
-    result = master.copy()
+def green_hand_alternate(master: Image.Image, alternate: Image.Image, activity: Image.Image) -> tuple[Image.Image, tuple[int, int]]:
+    result, offset = patched_alternate(master, alternate, activity)
     draw = ImageDraw.Draw(result)
-    outline = (62, 48, 31, 255)
-    draw.rounded_rectangle((269, 379, 280, 398), radius=2, fill=(240, 207, 61, 255), outline=outline, width=1)
-    draw.rounded_rectangle((300, 371, 311, 398), radius=2, fill=(112, 220, 95, 255), outline=outline, width=1)
-    draw.rounded_rectangle((332, 385, 343, 398), radius=2, fill=(240, 207, 61, 255), outline=outline, width=1)
-    return result
+    outline = (66, 43, 29, 255)
+    skin = (255, 218, 184, 255)
+    draw.line((329, 372, 338, 405), fill=outline, width=12)
+    draw.line((329, 372, 338, 405), fill=skin, width=7)
+    draw.ellipse((333, 399, 343, 410), fill=skin, outline=outline, width=2)
+    return result, offset
 
 
-def red_alternate(master: Image.Image) -> Image.Image:
-    result = master.copy()
-    draw = ImageDraw.Draw(result)
-    page = [(253, 361), (318, 291), (326, 346)]
-    draw.polygon(page, fill=(255, 240, 201, 255))
-    draw.line(page + [page[0]], fill=(67, 38, 24, 255), width=4, joint="curve")
-    draw.line((253, 361, 301, 343), fill=(215, 187, 137, 255), width=2)
-    return result
+def red_theme(image: Image.Image) -> Image.Image:
+    pixels = np.asarray(image.convert("RGBA")).copy()
+    red = pixels[:, :, 0].astype(np.int16)
+    green = pixels[:, :, 1].astype(np.int16)
+    blue = pixels[:, :, 2].astype(np.int16)
+    alpha = pixels[:, :, 3]
+    yellow = (
+        (alpha > 0)
+        & (red > 145)
+        & (green > 75)
+        & (blue < 145)
+        & ((red - blue) > 55)
+        & ((green - blue) > 35)
+    )
+    pixels[yellow, 0] = np.clip(red[yellow] + 10, 0, 255)
+    pixels[yellow, 1] = np.clip(green[yellow] * 0.24, 18, 86)
+    pixels[yellow, 2] = np.clip(blue[yellow] * 0.32 + 28, 28, 92)
+    themed = Image.fromarray(pixels, mode="RGBA")
+    canvas = Image.new("RGBA", (FRAME_SIZE, FRAME_SIZE), (0, 0, 0, 0))
+    canvas.alpha_composite(themed, ((FRAME_SIZE - themed.width) // 2, (FRAME_SIZE - themed.height) // 2))
+    return canvas
+
+
+def red_computer_frames() -> tuple[Image.Image, Image.Image]:
+    source_root = CHARACTER_ROOT / "yellow"
+    master = red_theme(Image.open(source_root / "working-1.png"))
+    alternate = red_theme(Image.open(source_root / "working-2.png"))
+    activity = region_mask(ACTIVITY_REGIONS["red"])
+    locked, _offset = patched_alternate(master, alternate, activity)
+    return master, locked
 
 
 def purple_alternate(master: Image.Image) -> Image.Image:
@@ -132,37 +146,37 @@ def purple_alternate(master: Image.Image) -> Image.Image:
 
 def build_alternate(character_id: str, master: Image.Image, alternate: Image.Image, activity: Image.Image) -> tuple[Image.Image, tuple[int, int]]:
     if character_id == "yellow":
-        return yellow_alternate(master), (0, 0)
+        return patched_alternate(master, alternate, activity)
     if character_id == "blue":
         return blue_alternate(master), (0, 0)
     if character_id == "green":
-        return green_alternate(master), (0, 0)
-    if character_id == "red":
-        return red_alternate(master), (0, 0)
+        return green_hand_alternate(master, alternate, activity)
     if character_id == "purple":
         return purple_alternate(master), (0, 0)
     return patched_alternate(master, alternate, activity)
 
 
 def main() -> None:
-    qa_root = ROOT / "artifacts" / "v3-focus-lock-qa"
+    qa_root = ROOT / "artifacts" / "v3-focus-hands-qa"
     qa_root.mkdir(parents=True, exist_ok=True)
     requested = set(sys.argv[1:])
 
     for character_id, points in ACTIVITY_REGIONS.items():
         if requested and character_id not in requested:
             continue
-        source_path = CHARACTER_ROOT / character_id / "sheet.png"
-        sheet = Image.open(source_path).convert("RGBA")
-        master = sheet.crop((FRAME_SIZE, 0, FRAME_SIZE * 2, FRAME_SIZE))
-        alternate = sheet.crop((FRAME_SIZE * 2, 0, FRAME_SIZE * 3, FRAME_SIZE))
         activity = region_mask(points)
-        locked, offset = build_alternate(character_id, master, alternate, activity)
+        if character_id == "red":
+            master, locked = red_computer_frames()
+            offset = (0, 0)
+        else:
+            source_path = CHARACTER_ROOT / character_id / "sheet.png"
+            sheet = Image.open(source_path).convert("RGBA")
+            master = sheet.crop((FRAME_SIZE, 0, FRAME_SIZE * 2, FRAME_SIZE))
+            alternate = sheet.crop((FRAME_SIZE * 2, 0, FRAME_SIZE * 3, FRAME_SIZE))
+            locked, offset = build_alternate(character_id, master, alternate, activity)
 
-        output_sheet = sheet.copy()
-        output_sheet.paste(locked, (FRAME_SIZE * 2, 0))
-        output_path = CHARACTER_ROOT / character_id / "sheet-locked.png"
-        output_sheet.save(output_path, optimize=True)
+        master.save(CHARACTER_ROOT / character_id / "focus-1.png", optimize=True)
+        locked.save(CHARACTER_ROOT / character_id / "focus-2.png", optimize=True)
 
         comparison = Image.new("RGBA", (FRAME_SIZE * 2, FRAME_SIZE), (0, 0, 0, 0))
         comparison.paste(master, (0, 0))
@@ -174,7 +188,7 @@ def main() -> None:
         if outside_difference.getbbox() is not None:
             raise RuntimeError(f"{character_id}: pixels changed outside the activity region")
 
-        print(f"{character_id}: aligned alternate by dx={offset[0]}, dy={offset[1]}", flush=True)
+        print(f"{character_id}: hand/prop frame offset dx={offset[0]}, dy={offset[1]}", flush=True)
 
 
 if __name__ == "__main__":
