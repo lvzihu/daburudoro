@@ -101,6 +101,7 @@ async function captureDevelopmentView() {
   const capturePath = process.env.DABURUDORO_CAPTURE_PATH;
   if (app.isPackaged || !capturePath) return;
   const view = process.env.DABURUDORO_CAPTURE_VIEW;
+  const requestedCharacter = process.env.DABURUDORO_CAPTURE_CHARACTER;
   await new Promise((resolve) => setTimeout(resolve, 250));
   if (view === "collapsed") {
     await mainWindow.webContents.executeJavaScript(
@@ -117,13 +118,14 @@ async function captureDevelopmentView() {
       'document.querySelector("#character-popover").hidden && document.querySelector("#character-menu-toggle").click()',
     );
   }
-  if (view === "blue") {
+  const captureCharacter = isCharacterId(requestedCharacter)
+    ? requestedCharacter
+    : view === "blue"
+      ? "blue"
+      : null;
+  if (captureCharacter) {
     await mainWindow.webContents.executeJavaScript(
-      'document.querySelector("#character-menu-toggle").click()',
-    );
-    await new Promise((resolve) => setTimeout(resolve, 100));
-    await mainWindow.webContents.executeJavaScript(
-      'document.querySelector("[data-character-id=blue]").click(); document.querySelector("#character-menu-close").click()',
+      `selectCharacter(${JSON.stringify(captureCharacter)})`,
     );
   }
   if (view === "focus") {
@@ -139,7 +141,11 @@ async function captureDevelopmentView() {
       'document.querySelector("#start").click(); setTimeout(() => { const state = timer.tick(Date.now() + (preferences.focusMinutes + preferences.breakMinutes) * 60 * 1000 + 1000); handleTransitions(state); render(state); }, 50)',
     );
   }
-  await new Promise((resolve) => setTimeout(resolve, 900));
+  const requestedDelay = Number(process.env.DABURUDORO_CAPTURE_DELAY_MS);
+  const captureDelay = Number.isFinite(requestedDelay) && requestedDelay >= 0
+    ? requestedDelay
+    : 900;
+  await new Promise((resolve) => setTimeout(resolve, captureDelay));
   const debugState = await mainWindow.webContents.executeJavaScript(
     '({ phase: timer?.phase, character: characterSession?.activeCharacterId, audioLoaded: Boolean(breakAudio?.src), audioPaused: breakAudio?.paused, audioVolume: breakAudio?.volume })',
   );

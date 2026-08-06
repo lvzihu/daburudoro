@@ -124,8 +124,8 @@ Control-click the app in Applications, choose **Open**, then confirm **Open**.
 
 - Preset sprite sheets live at `assets/characters/<color>/sheet.png`. Each
   original sheet contains Ready, Focus, sleeping, and completion poses.
-- Focus keeps one illustration pixel-stable and animates only a small
-  code-native activity cue, preventing the lower-body jump seen in v2.
+- Focus alternates the two activity drawings in each preset sheet, so gaming,
+  fishing, radio hosting, reading, and directing visibly animate.
 - User-imported images and music are copied to Electron's private app-data
   directory. They never enter the repository, packaged app, or GitHub Release.
 - Transparent areas outside active interaction rectangles pass clicks through;

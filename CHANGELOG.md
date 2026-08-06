@@ -26,8 +26,8 @@ owner completes the five-cycle acceptance test and merges the v3 pull request.
 
 ### Changed
 
-- Focus animation now uses one locked illustration plus a small code-native
-  activity cue so fixed body and furniture pixels never jump.
+- Focus animation now alternates the two real activity drawings in every
+  character sheet; the temporary code-drawn prop cues were removed.
 - Mouse acceptance is determined from global cursor position and explicit
   interaction rectangles instead of renderer `mousemove` events.
 - Break music stays owned by the outgoing character when the next character is
@@ -39,13 +39,13 @@ owner completes the five-cycle acceptance test and merges the v3 pull request.
 - Returning directly from the desktop to the character no longer depends on
   touching the progress bar before dragging.
 - The progress affordance is no longer a seven-pixel-only click target.
-- Timer Pause freezes the Focus activity cue and pauses Break audio.
+- Timer Pause freezes the Focus artwork animation and pauses Break audio.
 - Native import dialogs no longer collapse the settings popover that opened
   them.
 
 ### Verified so far
 
-- 28 automated tests pass.
+- 29 automated tests pass.
 - `npm audit` reports zero known vulnerabilities.
 - The application source contains no network calls.
 - A real managed WAV automatically played in Break at its persisted volume.

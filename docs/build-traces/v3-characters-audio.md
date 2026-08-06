@@ -42,7 +42,7 @@ static image substitution.
 | `pointer-regions.js` | Sanitize rectangles and determine cursor acceptance |
 | `settings-store.js` | Migrate and persist v3 preferences without breaking v2 data |
 | Electron main process | Native file dialogs, managed URLs, global cursor polling, lifecycle |
-| Renderer | Character picker, playback, activity cues, settings, timer integration |
+| Renderer | Character picker, playback, sprite animation, settings, timer integration |
 
 The timer state machine was deliberately left unchanged. Character and media
 state react to timer transitions instead of becoming part of timing logic.
@@ -84,35 +84,39 @@ Five 1536×1024 alpha sprite sheets were generated using the built-in image tool
 and a shared original style reference. Each 3×2 sheet contains Ready, two Focus
 concepts, sleep, completion wave, and one empty cell.
 
-The initial plan alternated the two Focus panels inside a clipped motion region.
-Visual QA rejected it: even a narrow clip exposed seams because the alternate
-pose had shifted. The shipped design therefore uses:
+The initial implementation candidate rejected full-frame swapping after a
+clipped overlay exposed seams. It froze one generated Focus panel and layered a
+small code-native prop cue over it.
 
-- one immutable generated Focus panel as the character base; and
-- a small code-native activity cue layered only over the prop.
+Owner acceptance testing caught that this did not read as character animation:
+the character stayed frozen while a disconnected vector moved. Before release,
+v3 was corrected to:
 
-This is a deliberate implementation refinement from the PRD's two-raster-frame
-proposal. It satisfies the user outcome more strongly: fixed body and furniture
-pixels cannot move at all. See the
+- remove all five CSS vector cues;
+- alternate the two complete Focus drawings already present in every sheet; and
+- freeze and resume that animation with Timer Pause/Resume.
+
+This restores the PRD's two-raster-frame behavior and records why the first
+fallback failed owner acceptance. See the
 [full art-production record](../art-direction/v3-character-sprites.md).
 
 ## Issues caught during the build
 
 | Finding | Resolution |
 |---|---|
-| Full alternate Focus frames still shifted the face and body. | Rejected frame swapping; locked one base and animated only a code-native prop cue. |
 | A hard clipped overlay produced a visible horizontal seam. | Rejected the clipped-overlay approach entirely. |
+| The replacement code-native cues looked disconnected from the frozen character. | Owner acceptance caught it; removed the cues and restored full two-panel raster animation before release. |
 | The released app's single-instance lock blocked development screenshots. | Added an isolated development profile for visual QA without quitting the user's running app. |
 | HTML media autoplay could vary with Chromium policy. | Set Electron's explicit no-user-gesture-required autoplay policy for local assigned music. |
 | Integer countdown values made the five-second fade step once per second. | Calculate playback gain from the precise timestamp deadline every 250ms. |
 | A native import dialog blurred and collapsed the popover that opened it. | Suppress blur-collapse while the native modal is active. |
-| Focus activity CSS continued while Timer Pause was active. | Bind animation play-state to the timer's paused UI state. |
+| Focus animation continued while Timer Pause was active. | Bind sprite animation play-state to the timer's paused UI state. |
 
 ## Verification evidence
 
 | Verification | Evidence |
 |---|---|
-| Deterministic logic | 28/28 Node tests pass. |
+| Deterministic logic | 29/29 Node tests pass, including the raster-animation contract. |
 | Syntax | Main, preload, and renderer pass Node syntax checks. |
 | Dependency security | `npm audit` reports zero known vulnerabilities. |
 | Network boundary | Source scan finds no application network calls. |

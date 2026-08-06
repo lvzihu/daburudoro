@@ -3,7 +3,6 @@ const elements = {
   companionSurface: document.querySelector("#companion-surface"),
   characterSprite: document.querySelector("#character-sprite"),
   character: document.querySelector("#character"),
-  activityMotion: document.querySelector("#activity-motion"),
   hideFloating: document.querySelector("#hide-floating"),
   characterMenuToggle: document.querySelector("#character-menu-toggle"),
   characterMenuClose: document.querySelector("#character-menu-close"),
@@ -202,7 +201,6 @@ function renderCharacter(state) {
   const assets = window.daburuDoro.frames[id] || {};
   elements.characterSprite.classList.add("is-hidden");
   elements.character.classList.remove("is-hidden");
-  elements.activityMotion.classList.toggle("is-hidden", Boolean(customImage));
 
   if (customImage && state.phase !== "break") {
     elements.character.src = customImage;
@@ -215,7 +213,7 @@ function renderCharacter(state) {
     elements.characterSprite.style.backgroundImage = `url("${assets.sheet}")`;
 
     if (state.phase === "focus") {
-      elements.characterSprite.style.backgroundPosition = "50% 0%";
+      elements.characterSprite.style.backgroundPosition = "";
       return;
     }
 

@@ -56,19 +56,22 @@ image directory. The selected source filenames were:
 The project stores only the alpha-ready final sheets. Temporary chroma sources
 are ignored by Git.
 
-## Runtime stability rule
+## Runtime animation decision
 
-Visual QA showed that even carefully prompted alternate Focus panels moved more
-than the requested prop. They remain in the sheet as production evidence, but
-the app does not alternate them.
+Pre-acceptance visual QA showed that carefully prompted alternate Focus panels
+moved more than the requested prop. The first implementation therefore froze
+the first panel and layered a code-native cue over it.
 
-V3 displays the first Focus panel as a locked base and uses a code-native cue:
+Owner acceptance testing rejected that fallback because the illustration looked
+static while an unrelated vector moved over it. The final v3 implementation
+removes those cues and alternates the two real Focus panels in every sheet:
 
-- Yellow: controller lights pulse.
-- Blue: bobber moves gently.
-- Green: mixer levels rise and fall.
-- Red: page cue turns slightly.
-- Purple: clapboard cue moves.
+- Yellow: the gaming pose changes.
+- Blue: the fishing rod and bobber change.
+- Green: the mixer-hand pose changes.
+- Red: the book page turns.
+- Purple: the clapboard changes position.
 
-This guarantees that the character, furniture, lower body, and transparent
-padding are pixel-identical for the entire Focus loop.
+The universal two-frame CSS animation stops with Timer Pause and resumes with
+the timer. This keeps the generated activity coherent as one illustration,
+without a synthetic overlay.

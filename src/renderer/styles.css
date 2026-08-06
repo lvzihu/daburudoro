@@ -79,100 +79,16 @@ button { color: inherit; }
 .character.is-hidden,
 .character-sprite.is-hidden { display: none; }
 
-.activity-motion {
-  position: absolute;
-  z-index: 2;
-  display: none;
-  pointer-events: none;
+.widget[data-phase="focus"] .character-sprite {
+  animation: focus-activity 1.4s steps(1, end) infinite;
 }
 
-.widget[data-phase="focus"] .activity-motion:not(.is-hidden) { display: block; }
-.widget.is-paused .activity-motion,
-.widget.is-paused .activity-motion i { animation-play-state: paused !important; }
+.widget.is-paused .character-sprite { animation-play-state: paused; }
 
-.widget[data-character="yellow"] .activity-motion {
-  left: 48%;
-  top: 67%;
-  width: 22px;
-  height: 9px;
+@keyframes focus-activity {
+  0%, 49.99% { background-position: 50% 0%; }
+  50%, 100% { background-position: 100% 0%; }
 }
-
-.widget[data-character="yellow"] .activity-motion i {
-  position: absolute;
-  width: 5px;
-  height: 5px;
-  border-radius: 50%;
-  background: #f3c43f;
-  box-shadow: 0 0 4px rgba(255, 222, 91, 0.9);
-  animation: game-light 1.2s steps(1) infinite;
-}
-
-.widget[data-character="yellow"] .activity-motion i:nth-child(1) { left: 0; }
-.widget[data-character="yellow"] .activity-motion i:nth-child(2) { left: 8px; animation-delay: 0.4s; }
-.widget[data-character="yellow"] .activity-motion i:nth-child(3) { left: 16px; animation-delay: 0.8s; }
-
-@keyframes game-light { 0%, 45% { opacity: 0.25; } 50%, 100% { opacity: 1; } }
-
-.widget[data-character="blue"] .activity-motion {
-  left: 90%;
-  top: 47%;
-  width: 8px;
-  height: 13px;
-  border-radius: 50%;
-  background: linear-gradient(#fff 0 45%, #e25650 46% 100%);
-  border: 1px solid #513225;
-  animation: bobber 1.3s ease-in-out infinite alternate;
-}
-
-.widget[data-character="blue"] .activity-motion i { display: none; }
-@keyframes bobber { to { transform: translateY(5px) rotate(3deg); } }
-
-.widget[data-character="green"] .activity-motion {
-  left: 58%;
-  top: 66%;
-  display: none;
-  align-items: end;
-  gap: 2px;
-  width: 16px;
-  height: 12px;
-}
-
-.widget[data-phase="focus"][data-character="green"] .activity-motion:not(.is-hidden) { display: flex; }
-.widget[data-character="green"] .activity-motion i {
-  width: 4px;
-  height: 4px;
-  border-radius: 2px;
-  background: #9ee174;
-  animation: radio-level 0.8s ease-in-out infinite alternate;
-}
-.widget[data-character="green"] .activity-motion i:nth-child(2) { animation-delay: 0.2s; }
-.widget[data-character="green"] .activity-motion i:nth-child(3) { animation-delay: 0.4s; }
-@keyframes radio-level { to { height: 12px; } }
-
-.widget[data-character="red"] .activity-motion {
-  left: 63%;
-  top: 57%;
-  width: 13px;
-  height: 10px;
-  border-top: 2px solid #f4dfbd;
-  transform-origin: left top;
-  animation: page-cue 1.6s ease-in-out infinite;
-}
-.widget[data-character="red"] .activity-motion i { display: none; }
-@keyframes page-cue { 0%, 65%, 100% { transform: rotate(0); } 80% { transform: rotate(-12deg); } }
-
-.widget[data-character="purple"] .activity-motion {
-  left: 24%;
-  top: 39%;
-  width: 28px;
-  height: 5px;
-  border-radius: 3px;
-  background: repeating-linear-gradient(90deg, #fff 0 6px, #292429 6px 12px);
-  transform-origin: left bottom;
-  animation: clapper-cue 1.8s ease-in-out infinite;
-}
-.widget[data-character="purple"] .activity-motion i { display: none; }
-@keyframes clapper-cue { 0%, 70%, 100% { transform: rotate(0); } 82% { transform: rotate(-16deg); } }
 
 .floating-button,
 .icon-button {
