@@ -5,28 +5,100 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta
       http-equiv="Content-Security-Policy"
-      content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:"
+      content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; media-src 'self' file:"
     />
     <title>DaburuDoro</title>
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
-    <main id="widget" class="widget is-collapsed">
-      <div class="companion-surface" aria-label="Drag DaburuDoro">
+    <main id="widget" class="widget is-collapsed" data-phase="idle">
+      <section id="companion-surface" class="companion-surface" aria-label="Drag DaburuDoro">
+        <div id="character-sprite" class="character-sprite" aria-hidden="true"></div>
         <img id="character" class="character" alt="Yellow companion" draggable="false" />
-      </div>
+        <span id="activity-motion" class="activity-motion" aria-hidden="true"><i></i><i></i><i></i></span>
 
-      <button
-        id="progress-toggle"
-        class="progress-toggle"
-        type="button"
-        aria-controls="panel"
-        aria-expanded="false"
-        title="Show timer controls"
-      >
-        <span id="progress-fill" class="progress-fill"></span>
-        <span id="progress-label" class="visually-hidden">Ready</span>
-      </button>
+        <button
+          id="hide-floating"
+          class="floating-button hide-floating"
+          type="button"
+          title="Hide DaburuDoro"
+          aria-label="Hide DaburuDoro"
+        >
+          ×
+        </button>
+
+        <button
+          id="character-menu-toggle"
+          class="floating-button character-menu-toggle"
+          type="button"
+          title="Choose companion"
+          aria-label="Choose companion"
+          aria-expanded="false"
+          aria-controls="character-popover"
+        >
+          <span class="hat-stack" aria-hidden="true">
+            <i></i><i></i><i></i><i></i><i></i>
+          </span>
+        </button>
+
+        <section
+          id="character-popover"
+          class="character-popover"
+          aria-label="Companion settings"
+          hidden
+        >
+          <header class="popover-header">
+            <div>
+              <strong>Choose companion</strong>
+              <span id="character-selection-label">Selected: Yellow</span>
+            </div>
+            <button id="character-menu-close" class="icon-button" type="button" aria-label="Close companion settings">×</button>
+          </header>
+
+          <div id="character-options" class="character-options" role="list"></div>
+
+          <div class="character-details">
+            <strong id="character-name">Yellow</strong>
+            <span id="character-activity">Playing games</span>
+          </div>
+
+          <div class="asset-row">
+            <button id="choose-music" type="button">Choose music…</button>
+            <button id="remove-music" class="text-button" type="button">Remove</button>
+          </div>
+          <p id="music-file" class="asset-status">No Break music assigned</p>
+
+          <label class="volume-control" for="music-volume">
+            <span>Music volume</span>
+            <input id="music-volume" type="range" min="0" max="100" step="1" />
+            <output id="music-volume-output" for="music-volume">70%</output>
+          </label>
+
+          <div class="asset-row">
+            <button id="choose-artwork" type="button">Use custom image…</button>
+            <button id="remove-artwork" class="text-button" type="button">Restore preset</button>
+          </div>
+          <p id="artwork-status" class="asset-status">Using preset artwork</p>
+          <p id="asset-error" class="asset-error" role="alert" aria-live="polite"></p>
+        </section>
+      </section>
+
+      <div id="progress-handle" class="progress-handle">
+        <button
+          id="progress-toggle"
+          class="progress-toggle"
+          type="button"
+          aria-controls="panel"
+          aria-expanded="false"
+          title="Show timer controls"
+        >
+          <span class="progress-track" aria-hidden="true">
+            <span id="progress-fill" class="progress-fill"></span>
+          </span>
+          <span id="progress-chevron" class="progress-chevron" aria-hidden="true">⌄</span>
+          <span id="progress-label" class="visually-hidden">Ready</span>
+        </button>
+      </div>
 
       <section id="panel" class="panel" aria-label="Timer controls">
         <header class="status-row">
@@ -72,7 +144,7 @@
         <footer class="panel-footer">
           <label class="sound-toggle">
             <input id="sound" type="checkbox" />
-            <span>Sound</span>
+            <span>Chime</span>
           </label>
           <button id="defaults" class="text-button" type="button">Defaults</button>
           <button id="collapse" class="text-button" type="button">Collapse</button>
@@ -80,6 +152,9 @@
       </section>
     </main>
 
+    <script src="../character-catalog.js"></script>
+    <script src="../character-session.js"></script>
+    <script src="../audio-policy.js"></script>
     <script src="../timer.js"></script>
     <script src="renderer.js"></script>
   </body>

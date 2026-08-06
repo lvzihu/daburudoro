@@ -9,12 +9,17 @@ const {
   screen,
   Tray,
 } = require("electron");
+const fs = require("node:fs");
 const path = require("node:path");
+const { pathToFileURL } = require("node:url");
+const { AssetManager } = require("./asset-manager");
+const { CHARACTER_IDS, isCharacterId } = require("./character-catalog");
+const { pointInRegions, sanitizeRegions } = require("./pointer-regions");
 const { SettingsStore } = require("./settings-store");
 const { isPositionVisible, positionAtRightCenter } = require("./window-position");
 
 const WINDOW_WIDTH = 280;
-const WINDOW_HEIGHT = 460;
+const WINDOW_HEIGHT = 480;
 const WINDOW_SIZE = { width: WINDOW_WIDTH, height: WINDOW_HEIGHT };
 
 let mainWindow;
@@ -23,8 +28,17 @@ let settingsStore;
 let isQuitting = false;
 let savePositionTimer;
 let sessionActive = false;
+let assetManager;
+let interactionRegions = [];
+let mouseInputIgnored = false;
+let pointerPollTimer;
+let modalInteractionOpen = false;
 
 app.setName("DaburuDoro");
+app.commandLine.appendSwitch("autoplay-policy", "no-user-gesture-required");
+if (!app.isPackaged && process.env.DABURUDORO_USER_DATA_DIR) {
+  app.setPath("userData", process.env.DABURUDORO_USER_DATA_DIR);
+}
 
 const hasSingleInstanceLock = app.requestSingleInstanceLock();
 if (!hasSingleInstanceLock) app.quit();
@@ -57,10 +71,169 @@ function showWidget() {
   ensureWindowIsVisible();
   mainWindow.show();
   mainWindow.focus();
+  setMouseInputIgnored(false);
 }
 
 function hideWidget() {
   mainWindow?.hide();
+}
+
+function setMouseInputIgnored(shouldIgnore) {
+  if (!mainWindow || mainWindow.isDestroyed() || mouseInputIgnored === shouldIgnore) return;
+  mouseInputIgnored = shouldIgnore;
+  mainWindow.setIgnoreMouseEvents(shouldIgnore, { forward: true });
+}
+
+function updatePointerAcceptance() {
+  if (!mainWindow || mainWindow.isDestroyed() || !mainWindow.isVisible()) return;
+  const cursor = screen.getCursorScreenPoint();
+  const bounds = mainWindow.getBounds();
+  const point = { x: cursor.x - bounds.x, y: cursor.y - bounds.y };
+  setMouseInputIgnored(!pointInRegions(point, interactionRegions));
+}
+
+function startPointerPolling() {
+  clearInterval(pointerPollTimer);
+  pointerPollTimer = setInterval(updatePointerAcceptance, 50);
+}
+
+async function captureDevelopmentView() {
+  const capturePath = process.env.DABURUDORO_CAPTURE_PATH;
+  if (app.isPackaged || !capturePath) return;
+  const view = process.env.DABURUDORO_CAPTURE_VIEW;
+  await new Promise((resolve) => setTimeout(resolve, 250));
+  if (view === "collapsed") {
+    await mainWindow.webContents.executeJavaScript(
+      '!document.querySelector("#widget").classList.contains("is-collapsed") && document.querySelector("#progress-toggle").click()',
+    );
+  }
+  if (view === "expanded") {
+    await mainWindow.webContents.executeJavaScript(
+      'document.querySelector("#widget").classList.contains("is-collapsed") && document.querySelector("#progress-toggle").click()',
+    );
+  }
+  if (view === "picker") {
+    await mainWindow.webContents.executeJavaScript(
+      'document.querySelector("#character-popover").hidden && document.querySelector("#character-menu-toggle").click()',
+    );
+  }
+  if (view === "blue") {
+    await mainWindow.webContents.executeJavaScript(
+      'document.querySelector("#character-menu-toggle").click()',
+    );
+    await new Promise((resolve) => setTimeout(resolve, 100));
+    await mainWindow.webContents.executeJavaScript(
+      'document.querySelector("[data-character-id=blue]").click(); document.querySelector("#character-menu-close").click()',
+    );
+  }
+  if (view === "focus") {
+    await mainWindow.webContents.executeJavaScript('document.querySelector("#start").click()');
+  }
+  if (view === "break") {
+    await mainWindow.webContents.executeJavaScript(
+      'document.querySelector("#start").click(); setTimeout(() => { const state = timer.tick(Date.now() + preferences.focusMinutes * 60 * 1000); handleTransitions(state); render(state); }, 50)',
+    );
+  }
+  if (view === "complete") {
+    await mainWindow.webContents.executeJavaScript(
+      'document.querySelector("#start").click(); setTimeout(() => { const state = timer.tick(Date.now() + (preferences.focusMinutes + preferences.breakMinutes) * 60 * 1000 + 1000); handleTransitions(state); render(state); }, 50)',
+    );
+  }
+  await new Promise((resolve) => setTimeout(resolve, 900));
+  const debugState = await mainWindow.webContents.executeJavaScript(
+    '({ phase: timer?.phase, character: characterSession?.activeCharacterId, audioLoaded: Boolean(breakAudio?.src), audioPaused: breakAudio?.paused, audioVolume: breakAudio?.volume })',
+  );
+  console.log("DaburuDoro visual-QA state:", JSON.stringify(debugState));
+  const image = await mainWindow.webContents.capturePage();
+  fs.writeFileSync(capturePath, image.toPNG());
+  isQuitting = true;
+  app.quit();
+}
+
+function managedAssetSnapshot() {
+  const preferences = settingsStore.get();
+  const artwork = {};
+  const music = {};
+
+  for (const id of CHARACTER_IDS) {
+    const imagePath = preferences.characterArtwork[id];
+    if (assetManager.isManagedImage(imagePath) && fs.existsSync(imagePath)) {
+      const extension = path.extname(imagePath).toLowerCase();
+      const mime = extension === ".png" ? "image/png" : extension === ".webp" ? "image/webp" : "image/jpeg";
+      artwork[id] = `data:${mime};base64,${fs.readFileSync(imagePath).toString("base64")}`;
+    } else {
+      artwork[id] = null;
+    }
+
+    const audioPath = preferences.characterMusic[id];
+    music[id] =
+      assetManager.isManagedAudio(audioPath) && fs.existsSync(audioPath)
+        ? { url: pathToFileURL(audioPath).href, fileName: path.basename(audioPath) }
+        : null;
+  }
+
+  return { artwork, music };
+}
+
+function rendererPreferenceUpdate(partial = {}) {
+  const allowed = [
+    "focusMinutes",
+    "breakMinutes",
+    "totalCycles",
+    "soundEnabled",
+    "expanded",
+    "windowPosition",
+    "characterId",
+    "nextCharacterId",
+    "musicVolume",
+  ];
+  return Object.fromEntries(allowed.filter((key) => key in partial).map((key) => [key, partial[key]]));
+}
+
+async function importManagedAsset(kind, characterId) {
+  if (!isCharacterId(characterId)) throw new RangeError("Unknown character.");
+  const isImage = kind === "artwork";
+  modalInteractionOpen = true;
+  let result;
+  try {
+    result = await dialog.showOpenDialog(mainWindow, {
+      title: isImage ? `Choose ${characterId} artwork` : `Choose ${characterId} Break music`,
+      properties: ["openFile"],
+      filters: isImage
+        ? [{ name: "Images", extensions: ["png", "jpg", "jpeg", "webp"] }]
+        : [{ name: "Audio", extensions: ["mp3", "m4a", "wav"] }],
+    });
+  } finally {
+    modalInteractionOpen = false;
+  }
+  if (result.canceled || !result.filePaths[0]) return managedAssetSnapshot();
+
+  const key = isImage ? "characterArtwork" : "characterMusic";
+  const previous = settingsStore.get()[key][characterId];
+  const imported = isImage
+    ? assetManager.importImage(characterId, result.filePaths[0])
+    : assetManager.importAudio(characterId, result.filePaths[0]);
+  const nextMap = { ...settingsStore.get()[key], [characterId]: imported };
+  settingsStore.save({ [key]: nextMap });
+  const previousIsManaged = isImage
+    ? assetManager.isManagedImage(previous)
+    : assetManager.isManagedAudio(previous);
+  if (previous && previous !== imported && previousIsManaged) assetManager.remove(previous);
+  return managedAssetSnapshot();
+}
+
+function removeManagedAsset(kind, characterId) {
+  if (!isCharacterId(characterId)) throw new RangeError("Unknown character.");
+  const key = kind === "artwork" ? "characterArtwork" : "characterMusic";
+  const preferences = settingsStore.get();
+  const previous = preferences[key][characterId];
+  const nextMap = { ...preferences[key], [characterId]: null };
+  settingsStore.save({ [key]: nextMap });
+  const previousIsManaged = kind === "artwork"
+    ? assetManager.isManagedImage(previous)
+    : assetManager.isManagedAudio(previous);
+  if (previous && previousIsManaged) assetManager.remove(previous);
+  return managedAssetSnapshot();
 }
 
 async function confirmEndSession(message = "End this session?") {
@@ -144,12 +317,19 @@ function createWindow() {
   mainWindow.setAlwaysOnTop(true, "floating");
   mainWindow.loadFile(path.join(__dirname, "renderer", "index.html"));
   mainWindow.once("ready-to-show", () => mainWindow.show());
+  mainWindow.webContents.once("did-finish-load", () => {
+    setMouseInputIgnored(false);
+    startPointerPolling();
+    captureDevelopmentView();
+  });
   mainWindow.on("move", () => {
     clearTimeout(savePositionTimer);
     savePositionTimer = setTimeout(saveWindowPosition, 250);
   });
   mainWindow.on("blur", () => {
-    mainWindow?.webContents.send("app-action", "collapse-controls");
+    if (!modalInteractionOpen) {
+      mainWindow?.webContents.send("app-action", "collapse-controls");
+    }
   });
   mainWindow.on("close", (event) => {
     if (isQuitting) return;
@@ -157,6 +337,7 @@ function createWindow() {
     hideWidget();
   });
   mainWindow.on("closed", () => {
+    clearInterval(pointerPollTimer);
     mainWindow = null;
   });
   mainWindow.webContents.on("preload-error", (_event, _preloadPath, error) => {
@@ -164,19 +345,34 @@ function createWindow() {
   });
 }
 
-ipcMain.on("set-mouse-passthrough", (event, shouldIgnore) => {
-  const window = BrowserWindow.fromWebContents(event.sender);
-  window?.setIgnoreMouseEvents(shouldIgnore, { forward: true });
+ipcMain.on("interaction-regions:update", (_event, regions) => {
+  interactionRegions = sanitizeRegions(regions);
+  updatePointerAcceptance();
 });
 ipcMain.on("session:set-active", (_event, active) => {
   sessionActive = Boolean(active);
 });
 
 ipcMain.handle("preferences:get", () => settingsStore.get());
-ipcMain.handle("preferences:save", (_event, partial) => settingsStore.save(partial));
+ipcMain.handle("preferences:save", (_event, partial) =>
+  settingsStore.save(rendererPreferenceUpdate(partial)),
+);
 ipcMain.handle("preferences:reset-defaults", () => settingsStore.resetTimerDefaults());
 ipcMain.handle("session:confirm-reset", () => confirmEndSession());
 ipcMain.handle("widget:hide", () => hideWidget());
+ipcMain.handle("assets:get", () => managedAssetSnapshot());
+ipcMain.handle("assets:import-artwork", (_event, characterId) =>
+  importManagedAsset("artwork", characterId),
+);
+ipcMain.handle("assets:remove-artwork", (_event, characterId) =>
+  removeManagedAsset("artwork", characterId),
+);
+ipcMain.handle("assets:import-music", (_event, characterId) =>
+  importManagedAsset("music", characterId),
+);
+ipcMain.handle("assets:remove-music", (_event, characterId) =>
+  removeManagedAsset("music", characterId),
+);
 ipcMain.handle("notification:show", (_event, { body }) => {
   if (!Notification.isSupported()) return false;
   new Notification({ title: "DaburuDoro", body, silent: true }).show();
@@ -189,6 +385,7 @@ if (hasSingleInstanceLock) {
   app.whenReady().then(() => {
     settingsStore = new SettingsStore(path.join(app.getPath("userData"), "preferences.json"));
     settingsStore.load();
+    assetManager = new AssetManager(path.join(app.getPath("userData"), "managed-assets"));
     createWindow();
     createTray();
 
