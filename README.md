@@ -1,9 +1,9 @@
 # DaburuDoro
 
 A floating, always-on-top desktop **Pomodoro companion** that gives a
-body-doubling feeling: a cartoon character that visibly "works" (typing) while
-you work and does a break activity (piano) on breaks, mirroring your timer.
-macOS, Electron. Personal, non-commercial.
+body-doubling feeling: choose an original cartoon companion with its own Focus
+activity, then let it sleep while your local Break music plays. macOS, Electron.
+Personal, non-commercial.
 
 ## How this project is specced and versioned
 
@@ -50,14 +50,20 @@ must stay publicly defensible. Any personal, real-person-styled asset is a
 - v2 implements the approved `daburudoro-v2-prd.md` scope and was owner-tested
   and accepted for the `v2.0.0` release in
   [PR #1](https://github.com/lvzihu/daburudoro/pull/1).
-- v3 is scoped in `daburudoro-v3-prd.md`; implementation has not started.
+- v3 implements the frozen `daburudoro-v3-prd.md` scope on
+  `feat/v3-characters-audio` and is awaiting owner acceptance.
 
 ## Version history and build evidence
 
 - [`CHANGELOG.md`](CHANGELOG.md) — reader-friendly improvements by version.
 - [`docs/releases/v2.0.0.md`](docs/releases/v2.0.0.md) — v2 release notes.
+- [`docs/releases/v3.0.0.md`](docs/releases/v3.0.0.md) — draft v3 release notes.
 - [`docs/build-traces/v2-daily-usability.md`](docs/build-traces/v2-daily-usability.md)
   — decisions, implementation sequence, verification, and acceptance gate.
+- [`docs/build-traces/v3-characters-audio.md`](docs/build-traces/v3-characters-audio.md)
+  — the v3 engineering and visual-production trace.
+- [`docs/art-direction/v3-character-sprites.md`](docs/art-direction/v3-character-sprites.md)
+  — reproducible character prompt set and asset rules.
 - [`daburudoro-v1-prd.md`](daburudoro-v1-prd.md) and
   [`daburudoro-v2-prd.md`](daburudoro-v2-prd.md), and
   [`daburudoro-v3-prd.md`](daburudoro-v3-prd.md) — frozen requirements for
@@ -72,7 +78,7 @@ npm install
 npm start
 ```
 
-Run the timer-state tests with `npm test`.
+Run all deterministic tests with `npm test`.
 
 ## Build the macOS app
 
@@ -87,27 +93,40 @@ Spotlight, or the Dock without opening a terminal.
 This development build is not notarized. If macOS blocks its first launch,
 Control-click the app in Applications, choose **Open**, then confirm **Open**.
 
-## Use v2
+## Use v3
 
 - Drag the character to move the entire widget. DaburuDoro remembers the last
   visible position and recovers to the main screen if a monitor is removed.
-- Click the thin line beneath the character to open or collapse the controls.
+- Click the centered chevron beneath the character to open or collapse the
+  controls. Its generous hit area includes the progress line.
 - Set whole-minute Focus and Break durations plus the number of Cycles. Every
   cycle includes its break, including the final cycle.
 - Hide and restore the widget from either its control panel or the DaburuDoro
-  menu-bar icon. The active timer continues while hidden.
+  menu-bar icon, or click the character-level `×`. The active timer and Break
+  music continue while hidden.
 - The menu-bar icon provides **Show Widget**, **Hide Widget**,
   **Restart Session**, and **Quit DaburuDoro**.
 - Native notifications and one gentle chime mark phase transitions. Sound can
   be turned off in the control panel.
+- Choose one of five color companions before starting. During Break, use the
+  five-hats control to queue a different companion for the next Focus block.
+- Each companion has one Focus activity: gaming, fishing, radio hosting,
+  reading, or directing. All five sleep during Break.
+- In companion settings, assign one local MP3, M4A, or WAV file to each color.
+  The outgoing character's music starts automatically, plays once, and fades
+  during the final five seconds. One global volume is remembered.
+- A private PNG, JPG/JPEG, or WEBP can replace a color slot's Ready and Focus
+  image. Break still uses that preset color's sleeping illustration.
 - Quit ends the active session. The next launch restores settings and position,
   but begins idle.
 
-## Character assets
+## Character and media assets
 
-- Character frames are discovered by filename from
-  `assets/characters/yellow/`. Replace `working-*.png`, `break-*.png`, and
-  `idle-*.png` to change the art without editing code.
-- Focus uses the typing loop, Break uses the piano loop, and Ready/Complete uses
-  the standing-and-waving loop.
-- The widget passes mouse clicks through its transparent/non-control area.
+- Preset sprite sheets live at `assets/characters/<color>/sheet.png`. Each
+  original sheet contains Ready, Focus, sleeping, and completion poses.
+- Focus keeps one illustration pixel-stable and animates only a small
+  code-native activity cue, preventing the lower-body jump seen in v2.
+- User-imported images and music are copied to Electron's private app-data
+  directory. They never enter the repository, packaged app, or GitHub Release.
+- Transparent areas outside active interaction rectangles pass clicks through;
+  the character, controls, and panel remain reliably draggable or clickable.
