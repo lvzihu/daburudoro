@@ -2,6 +2,8 @@
 
 Status: implementation and automated visual QA complete; owner recheck pending.
 
+Implementation commit: `4a9212e fix: polish v3 acceptance visuals`
+
 This is a new document. It does not modify or replace the frozen
 `daburudoro-v3-prd.md` or the earlier
 `daburudoro-v3-acceptance-amendment-2026-08-06.md`.
