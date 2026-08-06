@@ -63,15 +63,28 @@ moved more than the requested prop. The first implementation therefore froze
 the first panel and layered a code-native cue over it.
 
 Owner acceptance testing rejected that fallback because the illustration looked
-static while an unrelated vector moved over it. The final v3 implementation
-removes those cues and alternates the two real Focus panels in every sheet:
+static while an unrelated vector moved over it. A second candidate alternated
+the two complete generated Focus panels, but owner testing correctly found that
+the full character shifted again, recreating the v2 defect.
 
-- Yellow: the gaming pose changes.
-- Blue: the fishing rod and bobber change.
-- Green: the mixer-hand pose changes.
-- Red: the book page turns.
-- Purple: the clapboard changes position.
+A targeted built-in image edit was also rejected: despite an explicit locked
+master and change-only-the-controller constraint, it rescaled and redrew Yellow.
+The generated experiment was not copied into the project.
+
+The accepted pipeline is deterministic. `scripts/build-locked-focus-sheets.py`
+starts Focus B as an exact copy of Focus A and changes only the declared
+activity region:
+
+- Yellow: controller buttons light in sequence.
+- Blue: the bobber rises on the fixed fishing line.
+- Green: the mixer meters change level.
+- Red: one page lifts from the fixed book.
+- Purple: the monitor recording light turns on while the director watches.
+
+It writes `sheet-locked.png` beside—not over—each original `sheet.png`, plus
+side-by-side QA evidence in `artifacts/v3-focus-lock-qa/`. The script fails if
+any pixel changes outside the activity polygon.
 
 The universal two-frame CSS animation stops with Timer Pause and resumes with
-the timer. This keeps the generated activity coherent as one illustration,
-without a synthetic overlay.
+the timer. Body, face, clothing, lower-body baseline, chair, desk, and monitor
+remain identical between Focus frames.

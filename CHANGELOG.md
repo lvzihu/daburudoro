@@ -26,8 +26,8 @@ owner completes the five-cycle acceptance test and merges the v3 pull request.
 
 ### Changed
 
-- Focus animation now alternates the two real activity drawings in every
-  character sheet; the temporary code-drawn prop cues were removed.
+- Focus animation now uses pixel-locked derivative sheets: the companion and
+  furniture stay identical while only a rasterized activity detail changes.
 - Mouse acceptance is determined from global cursor position and explicit
   interaction rectangles instead of renderer `mousemove` events.
 - Break music stays owned by the outgoing character when the next character is
@@ -45,7 +45,7 @@ owner completes the five-cycle acceptance test and merges the v3 pull request.
 
 ### Verified so far
 
-- 29 automated tests pass.
+- 30 automated tests pass.
 - `npm audit` reports zero known vulnerabilities.
 - The application source contains no network calls.
 - A real managed WAV automatically played in Break at its persisted volume.

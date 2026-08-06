@@ -89,15 +89,21 @@ clipped overlay exposed seams. It froze one generated Focus panel and layered a
 small code-native prop cue over it.
 
 Owner acceptance testing caught that this did not read as character animation:
-the character stayed frozen while a disconnected vector moved. Before release,
-v3 was corrected to:
+the character stayed frozen while a disconnected vector moved. The next
+candidate alternated the complete generated panels, but testing caught whole-
+character movement again. A prompt-constrained image edit also redrew and
+rescaled its locked master, so it was rejected.
+
+The final pre-release correction:
 
 - remove all five CSS vector cues;
-- alternate the two complete Focus drawings already present in every sheet; and
+- derive Focus B deterministically from an exact copy of Focus A;
+- change pixels only inside one declared activity region per character;
+- preserve every original sheet and load a sibling `sheet-locked.png`; and
 - freeze and resume that animation with Timer Pause/Resume.
 
-This restores the PRD's two-raster-frame behavior and records why the first
-fallback failed owner acceptance. See the
+This restores the PRD's two-raster-frame behavior without repeating v2's drift.
+See the
 [full art-production record](../art-direction/v3-character-sprites.md).
 
 ## Issues caught during the build
@@ -105,7 +111,9 @@ fallback failed owner acceptance. See the
 | Finding | Resolution |
 |---|---|
 | A hard clipped overlay produced a visible horizontal seam. | Rejected the clipped-overlay approach entirely. |
-| The replacement code-native cues looked disconnected from the frozen character. | Owner acceptance caught it; removed the cues and restored full two-panel raster animation before release. |
+| Code-native cues looked disconnected from the frozen character. | Owner acceptance caught it; removed every runtime vector cue. |
+| Alternating complete generated panels made the whole character shift. | Owner acceptance caught the v2 regression; replaced full-panel swapping with pixel-locked derivative sheets. |
+| A strict image-edit prompt still rescaled and redrew the locked master. | Rejected the generated edit and built a deterministic Pillow/NumPy compositor with an outside-region equality assertion. |
 | The released app's single-instance lock blocked development screenshots. | Added an isolated development profile for visual QA without quitting the user's running app. |
 | HTML media autoplay could vary with Chromium policy. | Set Electron's explicit no-user-gesture-required autoplay policy for local assigned music. |
 | Integer countdown values made the five-second fade step once per second. | Calculate playback gain from the precise timestamp deadline every 250ms. |
@@ -116,15 +124,15 @@ fallback failed owner acceptance. See the
 
 | Verification | Evidence |
 |---|---|
-| Deterministic logic | 29/29 Node tests pass, including the raster-animation contract. |
+| Deterministic logic | 30/30 Node tests pass, including locked-sheet loading. |
 | Syntax | Main, preload, and renderer pass Node syntax checks. |
 | Dependency security | `npm audit` reports zero known vulnerabilities. |
 | Network boundary | Source scan finds no application network calls. |
-| Visual states | Real Electron captures passed collapsed, expanded, picker, Yellow/Blue Ready, Yellow Focus, Yellow sleeping Break, and completion wave. |
+| Visual states | Side-by-side 512px QA pairs confirm localized activity for all five characters; real Electron captures cover collapsed, expanded, picker, Ready, Focus, Break, and Complete. |
 | Local audio | A managed WAV automatically loaded and played in Break at persisted volume `0.42`. |
 | Packaging | `npm run build:mac` produced the Apple Silicon `.app`. |
 | Bundle metadata | Name `DaburuDoro`, ID `com.lvzihu.daburudoro`, version `3.0.0`. |
-| Packaged art | `app.asar` contains all five `sheet.png` files. |
+| Packaged art | `app.asar` contains all five original `sheet.png` files and all five runtime `sheet-locked.png` derivatives. |
 | Single instance | A second packaged launch using the same isolated profile exited and restored the existing process. |
 
 Reproducible commands:

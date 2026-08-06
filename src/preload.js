@@ -27,14 +27,17 @@ function fallbackFrames(characterId, state) {
 }
 
 function characterSheet(characterId) {
-  const sheetPath = path.join(
+  const characterRoot = path.join(
     __dirname,
     "..",
     "assets",
     "characters",
     characterId,
-    "sheet.png",
   );
+  const lockedPath = path.join(characterRoot, "sheet-locked.png");
+  const sheetPath = fs.existsSync(lockedPath)
+    ? lockedPath
+    : path.join(characterRoot, "sheet.png");
   if (!fs.existsSync(sheetPath)) return null;
   return `data:image/png;base64,${fs.readFileSync(sheetPath).toString("base64")}`;
 }
