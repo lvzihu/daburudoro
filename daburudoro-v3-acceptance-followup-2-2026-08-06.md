@@ -2,6 +2,8 @@
 
 Status: implementation and automated visual QA complete; owner recheck required.
 
+Implementation commit: `63fa1f7 fix: stabilize green selection and frames`
+
 This is a new document. It does not modify or replace the frozen v3 PRD or
 either earlier v3 acceptance document.
 
