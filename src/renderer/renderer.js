@@ -292,26 +292,30 @@ function setCharacterPopover(open) {
 
 function renderCharacterPicker(state) {
   const snapshot = characterSession.snapshot();
-  elements.characterOptions.replaceChildren();
+  if (!elements.characterOptions.children.length) {
+    for (const id of window.daburuDoro.characterIds) {
+      const character = window.daburuDoro.characters[id];
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "character-option";
+      button.dataset.characterId = id;
+      button.setAttribute("aria-label", `${character.label}: ${character.activity}`);
 
-  for (const id of window.daburuDoro.characterIds) {
-    const character = window.daburuDoro.characters[id];
-    const button = document.createElement("button");
-    button.type = "button";
-    button.className = "character-option";
-    button.dataset.characterId = id;
+      const swatch = document.createElement("span");
+      swatch.className = "character-swatch";
+      swatch.style.background = CHARACTER_COLORS[id];
+      const label = document.createElement("small");
+      label.textContent = character.label;
+      button.append(swatch, label);
+      button.addEventListener("click", () => selectCharacter(id));
+      elements.characterOptions.append(button);
+    }
+  }
+
+  for (const button of elements.characterOptions.children) {
+    const id = button.dataset.characterId;
     button.classList.toggle("is-selected", snapshot.activeCharacterId === id);
     button.classList.toggle("is-next", snapshot.nextCharacterId === id);
-    button.setAttribute("aria-label", `${character.label}: ${character.activity}`);
-
-    const swatch = document.createElement("span");
-    swatch.className = "character-swatch";
-    swatch.style.background = CHARACTER_COLORS[id];
-    const label = document.createElement("small");
-    label.textContent = character.label;
-    button.append(swatch, label);
-    button.addEventListener("click", () => selectCharacter(id));
-    elements.characterOptions.append(button);
   }
 
   const settingsCharacter = window.daburuDoro.characters[settingsCharacterId];
@@ -336,6 +340,7 @@ async function selectCharacter(characterId) {
   characterSession.select(characterId, timer.phase);
   if (timer.phase === "complete") completeFramesRemaining = 0;
   settingsCharacterId = characterId;
+  render(timer.snapshot());
   await persistCharacterSession();
   render(timer.snapshot());
 }

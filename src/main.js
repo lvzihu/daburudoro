@@ -121,10 +121,22 @@ async function captureDevelopmentView() {
       'document.querySelector("#widget").classList.contains("is-collapsed") && document.querySelector("#progress-toggle").click()',
     );
   }
-  if (view === "picker") {
+  if (view === "picker" || view === "picker-green-delayed-click") {
     await mainWindow.webContents.executeJavaScript(
       'document.querySelector("#character-popover").hidden && document.querySelector("#character-menu-toggle").click()',
     );
+  }
+  if (view === "picker-green-delayed-click") {
+    interactionRegions = [{ x: 0, y: 0, width: WINDOW_WIDTH, height: WINDOW_HEIGHT }];
+    setMouseInputIgnored(false);
+    const point = await mainWindow.webContents.executeJavaScript(
+      '(() => { const rect = document.querySelector(\'[data-character-id="green"]\').getBoundingClientRect(); return { x: Math.round(rect.x + rect.width / 2), y: Math.round(rect.y + rect.height / 2) }; })()',
+    );
+    mainWindow.webContents.sendInputEvent({ type: "mouseMove", x: point.x, y: point.y });
+    mainWindow.webContents.sendInputEvent({ type: "mouseDown", x: point.x, y: point.y, button: "left", clickCount: 1 });
+    await new Promise((resolve) => setTimeout(resolve, 350));
+    mainWindow.webContents.sendInputEvent({ type: "mouseUp", x: point.x, y: point.y, button: "left", clickCount: 1 });
+    await new Promise((resolve) => setTimeout(resolve, 150));
   }
   const captureCharacter = isCharacterId(requestedCharacter)
     ? requestedCharacter

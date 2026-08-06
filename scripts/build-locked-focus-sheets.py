@@ -96,14 +96,7 @@ def blue_alternate(master: Image.Image) -> Image.Image:
 
 
 def green_hand_alternate(master: Image.Image, alternate: Image.Image, activity: Image.Image) -> tuple[Image.Image, tuple[int, int]]:
-    result, offset = patched_alternate(master, alternate, activity)
-    draw = ImageDraw.Draw(result)
-    outline = (66, 43, 29, 255)
-    skin = (255, 218, 184, 255)
-    draw.line((329, 372, 338, 405), fill=outline, width=12)
-    draw.line((329, 372, 338, 405), fill=skin, width=7)
-    draw.ellipse((333, 399, 343, 410), fill=skin, outline=outline, width=2)
-    return result, offset
+    return patched_alternate(master, alternate, activity)
 
 
 def red_theme(image: Image.Image) -> Image.Image:
@@ -191,17 +184,30 @@ def main() -> None:
                 master = clean_purple_hand_artifact(master)
             locked, offset = build_alternate(character_id, master, alternate, activity)
 
+        # Materialize the composite before any source image is optimized. This
+        # prevents lazy RGBA data from sharing mutable encoder state.
+        locked.load()
+        locked = locked.copy()
         master.save(CHARACTER_ROOT / character_id / "focus-1.png", optimize=True)
-        locked.save(CHARACTER_ROOT / character_id / "focus-2.png", optimize=True)
+        locked_path = CHARACTER_ROOT / character_id / "focus-2.png"
+        locked.save(
+            locked_path,
+            format="PNG",
+            compress_level=6,
+        )
+        saved_locked = Image.open(locked_path).convert("RGBA")
+        if not np.array_equal(np.asarray(saved_locked), np.asarray(locked)):
+            raise RuntimeError(f"{character_id}: saved Focus frame does not match its RGBA source")
 
         comparison = Image.new("RGBA", (FRAME_SIZE * 2, FRAME_SIZE), (0, 0, 0, 0))
         comparison.paste(master, (0, 0))
         comparison.paste(locked, (FRAME_SIZE, 0))
         comparison.save(qa_root / f"{character_id}-focus-a-b.png", optimize=True)
 
-        outside = ImageChops.invert(activity)
-        outside_difference = ImageChops.multiply(ImageChops.difference(master, locked).convert("L"), outside)
-        if outside_difference.getbbox() is not None:
+        outside_pixels = np.asarray(activity) == 0
+        master_pixels = np.asarray(master)
+        locked_pixels = np.asarray(locked)
+        if np.any(master_pixels[outside_pixels] != locked_pixels[outside_pixels]):
             raise RuntimeError(f"{character_id}: pixels changed outside the activity region")
 
         print(f"{character_id}: hand/prop frame offset dx={offset[0]}, dy={offset[1]}", flush=True)
