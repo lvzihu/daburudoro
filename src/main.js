@@ -102,7 +102,15 @@ async function captureDevelopmentView() {
   if (app.isPackaged || !capturePath) return;
   const view = process.env.DABURUDORO_CAPTURE_VIEW;
   const requestedCharacter = process.env.DABURUDORO_CAPTURE_CHARACTER;
-  await new Promise((resolve) => setTimeout(resolve, 250));
+  let rendererReady = false;
+  for (let attempt = 0; attempt < 100; attempt += 1) {
+    rendererReady = await mainWindow.webContents.executeJavaScript(
+      'document.body.dataset.ready === "true"',
+    );
+    if (rendererReady) break;
+    await new Promise((resolve) => setTimeout(resolve, 50));
+  }
+  if (!rendererReady) throw new Error("Renderer did not become ready for visual QA.");
   if (view === "collapsed") {
     await mainWindow.webContents.executeJavaScript(
       '!document.querySelector("#widget").classList.contains("is-collapsed") && document.querySelector("#progress-toggle").click()',
@@ -305,7 +313,11 @@ function createWindow() {
   mainWindow.webContents.once("did-finish-load", () => {
     setMouseInputIgnored(false);
     startPointerPolling();
-    captureDevelopmentView();
+    captureDevelopmentView().catch((error) => {
+      console.error("DaburuDoro visual-QA capture failed:", error);
+      isQuitting = true;
+      app.quit();
+    });
   });
   mainWindow.on("move", () => {
     clearTimeout(savePositionTimer);

@@ -274,7 +274,7 @@ function setExpanded(expanded, persist = true) {
   elements.widget.classList.toggle("is-collapsed", !expanded);
   elements.progressToggle.setAttribute("aria-expanded", String(expanded));
   elements.progressToggle.title = expanded ? "Hide timer controls" : "Show timer controls";
-  elements.progressChevron.textContent = expanded ? "⌃" : "⌄";
+  elements.progressChevron.textContent = expanded ? "‹" : "›";
   if (persist) window.daburuDoro.savePreferences({ expanded });
   scheduleInteractionRegions();
 }
@@ -355,7 +355,7 @@ function render(state) {
   elements.progressLabel.textContent = `${label}, ${formatTime(state.secondsRemaining)} remaining`;
   const remainingRatio =
     state.phaseTotalSeconds > 0 ? state.secondsRemaining / state.phaseTotalSeconds : 0;
-  elements.progressFill.style.width = `${Math.max(0, Math.min(1, remainingRatio)) * 100}%`;
+  elements.progressFill.style.height = `${Math.max(0, Math.min(1, remainingRatio)) * 100}%`;
 
   elements.focusMinutes.disabled = fieldsLocked;
   elements.breakMinutes.disabled = fieldsLocked;
@@ -562,6 +562,7 @@ async function initialize() {
   settingsCharacterId = preferences.characterId;
   setExpanded(preferences.expanded, false);
   render(timer.snapshot());
+  document.body.dataset.ready = "true";
 }
 
 initialize();

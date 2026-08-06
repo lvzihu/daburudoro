@@ -27,7 +27,7 @@ ACTIVITY_REGIONS = {
     "yellow": [(145, 310), (370, 310), (370, 415), (145, 415)],
     "blue": [(410, 205), (455, 205), (455, 440), (410, 440)],
     "green": [(255, 315), (390, 315), (390, 425), (255, 425)],
-    "red": [(155, 215), (325, 215), (325, 335), (155, 335)],
+    "red": [(190, 280), (260, 280), (260, 330), (205, 330), (205, 320), (190, 320)],
     "purple": [(405, 275), (455, 275), (455, 330), (405, 330)],
 }
 
@@ -86,7 +86,9 @@ def blue_alternate(master: Image.Image) -> Image.Image:
     bobber = master.crop((414, 382, 449, 433))
     draw = ImageDraw.Draw(result)
     draw.rectangle((410, 219, 455, 440), fill=(0, 0, 0, 0))
-    draw.line((431, 216, 431, 313), fill=(72, 48, 37, 255), width=2)
+    draw.rectangle((428, 212, 435, 219), fill=(0, 0, 0, 0))
+    draw.line((431, 208, 431, 313), fill=(45, 34, 38, 255), width=3)
+    draw.line((431, 210, 431, 313), fill=(188, 178, 155, 255), width=1)
     result.alpha_composite(bobber, (414, 300))
     if result.getchannel("A").crop((414, 382, 449, 433)).getbbox() is not None:
         raise RuntimeError("Blue: long-line bobber remained in the short-line frame")
@@ -136,6 +138,18 @@ def red_computer_frames() -> tuple[Image.Image, Image.Image]:
     return master, locked
 
 
+def clean_purple_hand_artifact(master: Image.Image) -> Image.Image:
+    result = master.copy()
+    pixels = result.load()
+    for y in range(312, 333):
+        for x in range(312, 318):
+            red, green, blue, alpha = pixels[x, y]
+            is_skin = red > 180 and green > 145 and blue > 115
+            if alpha > 0 and not is_skin:
+                pixels[x, y] = (42, 34, 34, alpha)
+    return result
+
+
 def purple_alternate(master: Image.Image) -> Image.Image:
     result = master.copy()
     draw = ImageDraw.Draw(result)
@@ -173,6 +187,8 @@ def main() -> None:
             sheet = Image.open(source_path).convert("RGBA")
             master = sheet.crop((FRAME_SIZE, 0, FRAME_SIZE * 2, FRAME_SIZE))
             alternate = sheet.crop((FRAME_SIZE * 2, 0, FRAME_SIZE * 3, FRAME_SIZE))
+            if character_id == "purple":
+                master = clean_purple_hand_artifact(master)
             locked, offset = build_alternate(character_id, master, alternate, activity)
 
         master.save(CHARACTER_ROOT / character_id / "focus-1.png", optimize=True)
