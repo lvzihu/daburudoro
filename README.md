@@ -52,18 +52,22 @@ deferred to v5, after the v4 UI redesign.
 - v2 implements the approved `daburudoro-v2-prd.md` scope and was owner-tested
   and accepted for the `v2.0.0` release in
   [PR #1](https://github.com/lvzihu/daburudoro/pull/1).
-- v3 implements the frozen `daburudoro-v3-prd.md` scope on
-  `feat/v3-characters-audio` and is awaiting owner acceptance.
+- v3 implements the frozen `daburudoro-v3-prd.md` scope, passed owner testing,
+  and was approved for the `v3.0.0` release in
+  [PR #2](https://github.com/lvzihu/daburudoro/pull/2).
 
 ## Version history and build evidence
 
 - [`CHANGELOG.md`](CHANGELOG.md) — reader-friendly improvements by version.
 - [`docs/releases/v2.0.0.md`](docs/releases/v2.0.0.md) — v2 release notes.
-- [`docs/releases/v3.0.0.md`](docs/releases/v3.0.0.md) — draft v3 release notes.
+- [`docs/releases/v3.0.0-final.md`](docs/releases/v3.0.0-final.md) — accepted v3
+  release notes; the earlier draft remains preserved separately.
 - [`docs/build-traces/v2-daily-usability.md`](docs/build-traces/v2-daily-usability.md)
   — decisions, implementation sequence, verification, and acceptance gate.
 - [`docs/build-traces/v3-characters-audio.md`](docs/build-traces/v3-characters-audio.md)
   — the v3 engineering and visual-production trace.
+- [`docs/build-traces/v3-release-2026-08-06.md`](docs/build-traces/v3-release-2026-08-06.md)
+  — final acceptance, correction commits, and release-version rationale.
 - [`docs/art-direction/v3-character-sprites.md`](docs/art-direction/v3-character-sprites.md)
   — reproducible character prompt set and asset rules.
 - [`daburudoro-v1-prd.md`](daburudoro-v1-prd.md) and

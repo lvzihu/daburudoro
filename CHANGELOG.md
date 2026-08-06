@@ -4,10 +4,11 @@ All notable changes to DaburuDoro are recorded here. Product requirements are
 kept in separate, frozen PRDs so the intended scope and the shipped result can
 be compared without rewriting history.
 
-## [3.0.0] — pending owner acceptance
+## [3.0.0] — 2026-08-06
 
-Implementation is complete on `feat/v3-characters-audio`. Publish after the
-owner completes the five-cycle acceptance test and merges the v3 pull request.
+Released after iterative owner testing and acceptance in
+[#2](https://github.com/lvzihu/daburudoro/pull/2). The separate correction
+commits and dated acceptance documents preserve each feedback round.
 
 ### Added
 
@@ -46,9 +47,9 @@ owner completes the five-cycle acceptance test and merges the v3 pull request.
   them.
 - Blue's short-line fishing frame no longer retains the long-line bobber.
 
-### Verified so far
+### Verified
 
-- 30 automated tests pass.
+- 38 automated tests pass.
 - `npm audit` reports zero known vulnerabilities.
 - The application source contains no network calls.
 - A real managed WAV automatically played in Break at its persisted volume.
@@ -58,9 +59,10 @@ owner completes the five-cycle acceptance test and merges the v3 pull request.
 - The packaged app contains both standalone Focus frames for all five presets
   and rejects a duplicate launch.
 
-See the [draft release notes](docs/releases/v3.0.0.md),
+See the [final release notes](docs/releases/v3.0.0-final.md), the preserved
+[draft release notes](docs/releases/v3.0.0.md),
 [engineering build trace](docs/build-traces/v3-characters-audio.md), and
-[art-production record](docs/art-direction/v3-character-sprites.md).
+[final release trace](docs/build-traces/v3-release-2026-08-06.md).
 
 ## [2.0.0] — 2026-08-05
 
